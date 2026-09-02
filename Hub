@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>مارک شیٹ مینجمنٹ سسٹم</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f8f4;color:#17352a;font-family:"Noto Naskh Arabic","Noto Nastaliq Urdu",Arial,sans-serif}
+header{background:#087f5b;color:#fff;padding:16px;text-align:center;box-shadow:0 2px 8px #0002}
+header h1{margin:0;font-size:25px} header p{margin:4px 0;font-size:15px}
+.container{max-width:1200px;margin:auto;padding:14px}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 2px 10px #0001}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px}
+button{border:0;border-radius:9px;padding:10px 14px;font-size:15px;cursor:pointer;background:#087f5b;color:#fff}
+button.secondary{background:#e7f5ee;color:#075b42;border:1px solid #a8d8c4}
+button.danger{background:#c0392b}
+button.whatsapp{background:#168a4b}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+label{font-weight:bold;font-size:14px} input,select{width:100%;padding:10px;border:1px solid #b9cec5;border-radius:8px;margin-top:5px;font-size:15px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse}
+.student-picker{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.student-picker>div{flex:1;min-width:220px}
+.student-picker select{background:#fff}
+.selected-detail{border:2px solid #087f5b;border-radius:12px;padding:12px;margin-top:12px;background:#f8fffb}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.individual-sheet{background:#fff;border:1px solid #c9d9d2;border-radius:14px;padding:16px;margin:14px 0;page-break-after:always}
+.sheet-head{text-align:center;border-bottom:2px solid #087f5b;padding-bottom:8px;margin-bottom:12px}
+.sheet-head h2,.sheet-head h3{margin:4px 0}
+.student-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:12px}
+.info-box{background:#f1f8f4;border-radius:8px;padding:8px}
+.sheet-table{min-width:0}
+.result-box{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.result-item{text-align:center;background:#e7f5ee;border-radius:9px;padding:10px}
+.result-item strong{font-size:18px}
+.position-badge{font-weight:bold}
+@media(max-width:700px){
+ .container{padding:8px}
+ .card{padding:10px;border-radius:11px}
+ header{padding:12px 8px}
+ header h1{font-size:21px}
+ header p{font-size:13px}
+ .toolbar button{flex:1 1 calc(50% - 8px);font-size:14px;padding:9px 8px}
+ .grid{grid-template-columns:1fr}
+ .student-picker>div{min-width:100%;}
+ .result-box{grid-template-columns:repeat(2,1fr)}
+ table{font-size:13px}
+ th,td{padding:5px}
+ #marksTable{display:block;overflow-x:auto;white-space:nowrap}
+ #marksTable thead,#marksTable tbody{display:table;width:100%}
+ .individual-sheet{padding:10px}
+}
+@media(min-width:701px) and (max-width:1100px){.container{max-width:100%;}}
+th,td{border:1px solid #c9d9d2;padding:7px;text-align:center}
+th{background:#087f5b;color:#fff}
+td input{margin:0;min-width:70px}
+.notice{padding:10px;border-radius:9px;background:#fff7d6;border:1px solid #ead37a;margin-top:10px}
+.hidden{display:none}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:#e7f5ee;border-radius:10px;padding:10px 16px;font-weight:bold}
+.print-hide-temp{display:none!important}
+@media print{
+ .no-print{display:none!important}
+ body{background:#fff}.card{box-shadow:none;border:0}
+ table{min-width:0;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>📚 مدرسہ محمدیہ اسلامیہ</h1>
+<p>بھوجرڈہ بنی، بھوج، کچھ، گجرات</p>
+<p>اجتماعی مارک شیٹ مینجمنٹ سسٹم</p>
+</header>
+
+<div class="container">
+
+<div class="card no-print">
+<div class="toolbar">
+<button onclick="showSection('marks')">📊 مارک شیٹ</button>
+<button onclick="addStudent()">➕ طالب علم شامل کریں</button>
+<button class="secondary" onclick="saveData()">💾 محفوظ کریں</button>
+<button class="secondary" onclick="window.print()">🖨️ پرنٹ / PDF</button>
+<button class="secondary" onclick="changePin()">🔄 PIN تبدیل کریں</button>
+<button class="whatsapp" onclick="contactWhatsApp()">📞 رابطہ WhatsApp</button>
+</div>
+</div>
+
+<div class="card">
+<h3>امتحان اور جماعت کی معلومات</h3>
+<div class="grid">
+<div><label>تعلیمی سال</label><input id="year" value="2026-27"></div>
+<div><label>درجہ / جماعت</label>
+<select id="className">
+<option>اول</option><option>دوم</option><option>سوم</option><option>چہارم</option>
+<option>پنجم</option><option>ششم</option><option>ہفتم</option><option>ہشتم</option>
+<option>حفظ</option><option>ناظرہ</option><option>دیگر</option>
+</select></div>
+<div><label>امتحان</label>
+<select id="examType"><option>سالانہ امتحان</option><option>ششماہی امتحان</option></select></div>
+<div><label>تاریخ</label><input id="examDate" type="date"></div>
+</div>
+</div>
+
+<div class="card">
+<h3>مضامین</h3>
+<div class="grid">
+<div><label>مضمون 1</label><input class="subject" value="قرآن مجید"></div>
+<div><label>مضمون 2</label><input class="subject" value="حدیث"></div>
+<div><label>مضمون 3</label><input class="subject" value="فقہ"></div>
+<div><label>مضمون 4</label><input class="subject" value="عربی"></div>
+<div><label>مضمون 5</label><input class="subject" value="اردو"></div>
+<div><label>مضمون 6</label><input class="subject" value="گجراتی"></div>
+</div>
+<div class="notice">ہر مضمون کے مقررہ نمبر تبدیل کیے جا سکتے ہیں۔</div>
+<div class="grid" style="margin-top:10px">
+<div><label>ہر مضمون کے مقررہ نمبر</label><input id="maxMarks" type="number" value="100" min="1"></div>
+</div>
+</div>
+
+<div class="card">
+<div class="stats">
+<div class="stat">طلبہ: <span id="studentCount">0</span></div>
+</div>
+</div>
+
+<div class="card" id="marks">
+<h3>تمام طلبہ کی اجتماعی مارک شیٹ</h3>
+<div class="table-wrap">
+<table id="marksTable">
+<thead></thead><tbody></tbody>
+</table>
+</div>
+</div>
+
+<div class="card" id="individualSheets">
+<h3>📄 طالب علم کی تفصیل</h3>
+<div class="student-picker no-print">
+  <div>
+    <label for="studentSelect">طالب علم منتخب کریں</label>
+    <select id="studentSelect" onchange="selectStudent(this.value)">
+      <option value="">طالب علم منتخب کریں...</option>
+    </select>
+  </div>
+  <button onclick="showSelectedStudent()">👁️ تفصیل دیکھیں</button>
+  <button class="secondary" onclick="printSelectedStudent()">🖨️ اس طالب علم کی PDF/پرنٹ</button>
+</div>
+<div id="selectedStudentDetail" class="selected-detail hidden"></div>
+<h3 style="margin-top:22px">📄 تمام طلبہ کی انفرادی مارک شیٹس</h3>
+<div id="individualContainer"></div>
+</div>
+
+</div>
+
+<script>
+const STORAGE_KEY="madrasa_marksheet_management_v1";
+const PIN_KEY="madrasa_marksheet_pin";
+const WA="+919429820648";
+let data={students:[]};
+let selectedStudentIndex="";
+
+function loadData(){
+ try{data=JSON.parse(localStorage.getItem(STORAGE_KEY))||{students:[]};}catch(e){data={students:[]}}
+ if(!localStorage.getItem(PIN_KEY))localStorage.setItem(PIN_KEY,"8080");
+ const m=data.meta||{};
+ if(m.year)year.value=m.year;
+ if(m.className)className.value=m.className;
+ if(m.examType)examType.value=m.examType;
+ if(m.date)examDate.value=m.date;
+ if(m.maxMarks)maxMarks.value=m.maxMarks;
+ if(Array.isArray(m.subjects)){
+   document.querySelectorAll(".subject").forEach((el,i)=>{if(m.subjects[i]!==undefined)el.value=m.subjects[i]});
+ }
+ document.getElementById("examDate").value ||= new Date().toISOString().slice(0,10);
+ render();
+}
+function subjects(){return [...document.querySelectorAll(".subject")].map(x=>x.value.trim()||"مضمون")}
+function addStudent(){
+ const name=prompt("طالب علم کا نام لکھیں:");
+ if(!name)return;
+ const father=prompt("والد کا نام لکھیں:")||"";
+ data.students.push({roll:data.students.length+1,name,father,marks:Array(subjects().length).fill(0)});
+ render();saveData(false);
+}
+function removeStudent(i){
+ if(confirm("کیا اس طالب علم کو حذف کرنا ہے؟")){
+   if(Number(selectedStudentIndex)===i) selectedStudentIndex="";
+   else if(selectedStudentIndex!=="" && Number(selectedStudentIndex)>i) selectedStudentIndex=Number(selectedStudentIndex)-1;
+   data.students.splice(i,1);data.students.forEach((s,j)=>s.roll=j+1);render();saveData(false)
+ }
+}
+function saveData(show=true){
+ data.meta={year:year.value,className:className.value,examType:examType.value,date:examDate.value,maxMarks:+maxMarks.value,subjects:subjects()};
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+ if(show)alert("ڈیٹا کامیابی سے محفوظ ہوگیا۔");
+}
+function render(){
+ const subs=subjects(), max=+maxMarks.value||100;
+ const th=document.querySelector("#marksTable thead");
+ th.innerHTML="<tr><th>رول</th><th>طالب علم</th><th>والد کا نام</th>"+
+ subs.map(s=>`<th>${esc(s)}<br><small>${max}</small></th>`).join("")+
+ "<th>کل حاصل</th><th>فیصد</th><th>نتیجہ</th><th class='no-print'>عمل</th></tr>";
+ const tb=document.querySelector("#marksTable tbody");tb.innerHTML="";
+ data.students.forEach((s,i)=>{
+   if(!Array.isArray(s.marks))s.marks=Array(subs.length).fill(0);
+   while(s.marks.length<subs.length)s.marks.push(0);
+   let total=s.marks.reduce((a,b)=>a+(+b||0),0);
+   const possible=subs.length*max, pct=possible?total/possible*100:0;
+   const pass=s.marks.every(m=>(+m||0)>=Math.ceil(max*.4));
+   const tr=document.createElement("tr");
+   tr.innerHTML=`<td>${s.roll}</td><td><input value="${esc(s.name)}" onchange="data.students[${i}].name=this.value;saveData(false);renderIndividualSheets()"></td>
+   <td><input value="${esc(s.father)}" onchange="data.students[${i}].father=this.value;saveData(false);renderIndividualSheets()"></td>`+
+   subs.map((_,j)=>`<td><input type="number" min="0" max="${max}" value="${s.marks[j]||0}" oninput="updateMark(${i},${j},this.value)"></td>`).join("")+
+   `<td id="tot${i}">${total}</td><td id="pct${i}">${pct.toFixed(2)}%</td><td id="res${i}">${pass?"پاس":"فیل"}</td>
+   <td class="no-print"><button class="danger" onclick="removeStudent(${i})">حذف</button></td>`;
+   tb.appendChild(tr);
+ });
+ studentCount.textContent=data.students.length;
+ updateStudentDropdown();
+ renderSelectedStudent();
+ renderIndividualSheets();
+}
+
+function updateStudentDropdown(){
+ const sel=document.getElementById("studentSelect");
+ if(!sel)return;
+ const old=selectedStudentIndex;
+ sel.innerHTML='<option value="">طالب علم منتخب کریں...</option>'+data.students.map((s,i)=>`<option value="${i}">${esc(s.roll)} — ${esc(s.name)}</option>`).join("");
+ if(old!=="" && data.students[old]) sel.value=String(old);
+}
+
+function selectStudent(v){
+ selectedStudentIndex=v===""?"":Number(v);
+ renderSelectedStudent();
+}
+
+function showSelectedStudent(){
+ if(selectedStudentIndex===""){alert("براہ کرم پہلے طالب علم منتخب کریں۔");return;}
+ const el=document.getElementById("selectedStudentDetail");
+ el.classList.remove("hidden");
+ el.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function renderSelectedStudent(){
+ const el=document.getElementById("selectedStudentDetail");
+ if(!el)return;
+ if(selectedStudentIndex==="" || !data.students[selectedStudentIndex]){el.classList.add("hidden");el.innerHTML="";return;}
+ const s=data.students[selectedStudentIndex], subs=subjects(), max=+maxMarks.value||100, possible=subs.length*max;
+ if(!Array.isArray(s.marks))s.marks=Array(subs.length).fill(0);
+ while(s.marks.length<subs.length)s.marks.push(0);
+ const total=s.marks.reduce((a,b)=>a+(+b||0),0);
+ const pct=possible?total/possible*100:0;
+ const pass=s.marks.every(m=>(+m||0)>=Math.ceil(max*.4));
+ const rank=(getRankings().find(r=>r.index===Number(selectedStudentIndex))||{}).rank||"-";
+ const grade=pct>=80?"A+":pct>=70?"A":pct>=60?"B":pct>=50?"C":pct>=40?"D":"F";
+ el.classList.remove("hidden");
+ el.innerHTML=`<div class="sheet-head"><h2>📚 ${esc("مدرسہ محمدیہ اسلامیہ")}</h2><p>بھوجرڈہ بنی، بھوج، کچھ، گجرات</p><h3>${esc(examType.value)} — منتخب طالب علم</h3></div>
+ <div class="student-info"><div class="info-box"><b>رول نمبر:</b> ${esc(s.roll)}</div><div class="info-box"><b>طالب علم:</b> ${esc(s.name)}</div><div class="info-box"><b>والد کا نام:</b> ${esc(s.father)}</div><div class="info-box"><b>درجہ:</b> ${esc(className.value)}</div><div class="info-box"><b>پوزیشن:</b> ${rank}</div><div class="info-box"><b>گریڈ:</b> ${grade}</div></div>
+ <table class="sheet-table"><thead><tr><th>نمبر</th><th>مضمون</th><th>مقررہ نمبر</th><th>حاصل شدہ</th><th>فیصد</th></tr></thead><tbody>${subs.map((sub,j)=>{const m=+s.marks[j]||0;return `<tr><td>${j+1}</td><td>${esc(sub)}</td><td>${max}</td><td>${m}</td><td>${(max?m/max*100:0).toFixed(2)}%</td></tr>`}).join("")}</tbody></table>
+ <div class="result-box"><div class="result-item">کل نمبر<br><strong>${possible}</strong></div><div class="result-item">کل حاصل شدہ<br><strong>${total}</strong></div><div class="result-item">فیصد<br><strong>${pct.toFixed(2)}%</strong></div><div class="result-item">پوزیشن / گریڈ<br><strong>${rank} / ${grade}</strong></div></div><div class="notice" style="text-align:center"><b>نتیجہ: ${pass?"پاس":"فیل"}</b></div>`;
+}
+
+function printSelectedStudent(){
+ if(selectedStudentIndex===""){alert("براہ کرم پہلے طالب علم منتخب کریں۔");return;}
+ const original=document.title;
+ document.title="طالب علم مارک شیٹ";
+ const all=document.querySelectorAll("body > .container > .card");
+ all.forEach(x=>{if(x.id!=="individualSheets")x.classList.add("print-hide-temp")});
+ const old=document.getElementById("individualContainer");
+ if(old)old.classList.add("print-hide-temp");
+ document.getElementById("selectedStudentDetail").classList.remove("hidden");
+ window.print();
+ setTimeout(()=>{all.forEach(x=>x.classList.remove("print-hide-temp"));if(old)old.classList.remove("print-hide-temp");document.title=original;},300);
+}
+
+function getRankings(){
+ const subs=subjects(), max=+maxMarks.value||100;
+ const possible=subs.length*max;
+ const rows=data.students.map((s,i)=>({
+   index:i,
+   total:(s.marks||[]).reduce((a,b)=>a+(+b||0),0),
+   pct:possible?((s.marks||[]).reduce((a,b)=>a+(+b||0),0)/possible*100):0
+ }));
+ rows.sort((a,b)=>b.total-a.total || a.index-b.index);
+ let lastTotal=null, lastRank=0;
+ rows.forEach((r,pos)=>{
+   if(r.total!==lastTotal){lastRank=pos+1;lastTotal=r.total}
+   r.rank=lastRank;
+ });
+ return rows;
+}
+
+function renderIndividualSheets(){
+ const box=document.getElementById("individualContainer");
+ if(!box)return;
+ const subs=subjects(), max=+maxMarks.value||100;
+ const possible=subs.length*max;
+ const rankings=getRankings();
+ if(!data.students.length){
+   box.innerHTML='<div class="notice">ابھی کوئی طالب علم شامل نہیں کیا گیا۔</div>';
+   return;
+ }
+ box.innerHTML="";
+ data.students.forEach((s,i)=>{
+   if(!Array.isArray(s.marks))s.marks=Array(subs.length).fill(0);
+   while(s.marks.length<subs.length)s.marks.push(0);
+   const total=s.marks.reduce((a,b)=>a+(+b||0),0);
+   const pct=possible?total/possible*100:0;
+   const pass=s.marks.every(m=>(+m||0)>=Math.ceil(max*.4));
+   const rank=(rankings.find(r=>r.index===i)||{}).rank||"-";
+   const grade=pct>=80?"A+":pct>=70?"A":pct>=60?"B":pct>=50?"C":pct>=40?"D":"F";
+   const sheet=document.createElement("div");
+   sheet.className="individual-sheet";
+   sheet.innerHTML=`
+   <div class="sheet-head">
+     <h2>📚 مدرسہ محمدیہ اسلامیہ</h2>
+     <p>بھوجرڈہ بنی، بھوج، کچھ، گجرات</p>
+     <h3>طالب علم کی انفرادی مارک شیٹ</h3>
+   </div>
+   <div class="student-info">
+     <div class="info-box"><b>تعلیمی سال:</b> ${esc(year.value)}</div>
+     <div class="info-box"><b>درجہ / جماعت:</b> ${esc(className.value)}</div>
+     <div class="info-box"><b>امتحان:</b> ${esc(examType.value)}</div>
+     <div class="info-box"><b>تاریخ:</b> ${esc(examDate.value)}</div>
+     <div class="info-box"><b>رول نمبر:</b> ${esc(s.roll)}</div>
+     <div class="info-box"><b>طالب علم:</b> ${esc(s.name)}</div>
+     <div class="info-box"><b>والد کا نام:</b> ${esc(s.father)}</div>
+     <div class="info-box"><b>پوزیشن:</b> <span class="position-badge">${rank}</span></div>
+   </div>
+   <table class="sheet-table">
+     <thead><tr><th>نمبر</th><th>مضمون</th><th>مقررہ نمبر</th><th>حاصل شدہ نمبر</th><th>فیصد</th></tr></thead>
+     <tbody>
+       ${subs.map((sub,j)=>{
+         const mark=+s.marks[j]||0;
+         const sp=max?mark/max*100:0;
+         return `<tr><td>${j+1}</td><td>${esc(sub)}</td><td>${max}</td><td>${mark}</td><td>${sp.toFixed(2)}%</td></tr>`;
+       }).join("")}
+     </tbody>
+   </table>
+   <div class="result-box">
+     <div class="result-item">کل نمبر<br><strong>${possible}</strong></div>
+     <div class="result-item">کل حاصل شدہ<br><strong>${total}</strong></div>
+     <div class="result-item">فیصد<br><strong>${pct.toFixed(2)}%</strong></div>
+     <div class="result-item">پوزیشن / گریڈ<br><strong>${rank} / ${grade}</strong></div>
+   </div>
+   <div class="notice" style="text-align:center;margin-top:12px">
+     <b>نتیجہ: ${pass?"پاس":"فیل"}</b>
+   </div>`;
+   box.appendChild(sheet);
+ });
+}
+
+function updateMark(i,j,v){
+ data.students[i].marks[j]=Math.max(0,Math.min(+maxMarks.value||100,+v||0));
+ const s=data.students[i], max=+maxMarks.value||100;
+ const total=s.marks.reduce((a,b)=>a+(+b||0),0), possible=subjects().length*max;
+ document.getElementById("tot"+i).textContent=total;
+ document.getElementById("pct"+i).textContent=(possible?total/possible*100:0).toFixed(2)+"%";
+ document.getElementById("res"+i).textContent=s.marks.every(m=>(+m||0)>=Math.ceil(max*.4))?"پاس":"فیل";
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+ renderIndividualSheets();
+}
+
+function changePin(){
+ const old=prompt("موجودہ PIN درج کریں:");
+ if(old!==localStorage.getItem(PIN_KEY)){alert("غلط PIN");return}
+ const n=prompt("نیا PIN درج کریں:");
+ if(n&&/^\d{4,8}$/.test(n)){localStorage.setItem(PIN_KEY,n);alert("PIN تبدیل ہوگیا۔")}
+ else alert("PIN کم از کم 4 اور زیادہ سے زیادہ 8 ہندسوں کا ہونا چاہیے۔");
+}
+function contactWhatsApp(){
+ window.location.href="https://wa.me/"+WA.replace("+","")+"?text="+encodeURIComponent("السلام علیکم، مدرسہ مارک شیٹ مینجمنٹ سسٹم کے سلسلے میں رابطہ کرنا ہے۔");
+}
+function showSection(id){document.getElementById(id).scrollIntoView({behavior:"smooth"})}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+document.querySelectorAll(".subject,#maxMarks,#className,#examType,#year,#examDate").forEach(e=>e.addEventListener("change",()=>{render();saveData(false)}));
+loadData();
+</script>
+</body>
+</html>
