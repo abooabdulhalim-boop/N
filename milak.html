@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="gu" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>દૂધ વ્યવસ્થાપન</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:Arial,"Noto Sans Gujarati",sans-serif;
+background:#f3f7f5;
+color:#17352d;
+}
+
+header{
+background:#176b3a;
+color:white;
+text-align:center;
+padding:18px;
+}
+
+header h1{margin:0 0 5px}
+
+nav{
+display:flex;
+flex-wrap:wrap;
+gap:7px;
+justify-content:center;
+background:white;
+padding:10px;
+position:sticky;
+top:0;
+z-index:5;
+box-shadow:0 2px 6px #0002;
+}
+
+nav button{
+border:0;
+border-radius:8px;
+padding:10px 13px;
+background:#e5f1eb;
+color:#176b3a;
+font-weight:bold;
+}
+
+nav button.active{
+background:#176b3a;
+color:white;
+}
+
+main{
+max-width:1100px;
+margin:auto;
+padding:15px;
+}
+
+.page{display:none}
+.page.active{display:block}
+
+.card{
+background:white;
+border-radius:13px;
+padding:16px;
+margin-bottom:15px;
+box-shadow:0 2px 8px #0001;
+}
+
+h2{
+color:#176b3a;
+margin-top:0;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+gap:12px;
+}
+
+label{
+font-weight:bold;
+font-size:14px;
+}
+
+input,select,textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+border:1px solid #cbd8d3;
+border-radius:8px;
+font:inherit;
+}
+
+button{cursor:pointer}
+
+.primary{
+background:#176b3a;
+color:white;
+border:0;
+border-radius:8px;
+padding:10px 15px;
+font-weight:bold;
+}
+
+.gray{
+background:#666;
+color:white;
+border:0;
+border-radius:8px;
+padding:10px 15px;
+}
+
+.danger{
+background:#c62828;
+color:white;
+border:0;
+border-radius:8px;
+padding:7px 10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:12px;
+background:white;
+}
+
+th,td{
+border-bottom:1px solid #ddd;
+padding:9px;
+text-align:center;
+font-size:13px;
+}
+
+th{
+background:#eaf3ee;
+color:#176b3a;
+}
+
+.milk-icon{
+font-size:48px;
+text-align:center;
+}
+
+.summary{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:10px;
+}
+
+.summary div{
+background:#eef7f2;
+border-radius:10px;
+padding:12px;
+text-align:center;
+}
+
+.big{
+font-size:25px;
+font-weight:bold;
+color:#176b3a;
+}
+
+.actions{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-top:12px;
+}
+
+.notice{
+background:#fff7d6;
+padding:10px;
+border-radius:8px;
+margin-top:12px;
+}
+
+/* PIN */
+#pinLock{
+position:fixed;
+inset:0;
+background:linear-gradient(135deg,#176b3a,#0d4d2a);
+z-index:999999;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+}
+
+.pin-box{
+width:min(390px,100%);
+background:white;
+border-radius:18px;
+padding:25px;
+text-align:center;
+box-shadow:0 10px 35px #0005;
+}
+
+.pin-box h2{
+margin:0 0 8px;
+}
+
+.pin-box input{
+font-size:28px;
+text-align:center;
+letter-spacing:10px;
+max-width:220px;
+margin:15px auto;
+}
+
+.pin-msg{
+min-height:24px;
+color:#c62828;
+font-weight:bold;
+}
+
+.pin-change{
+margin-top:10px;
+}
+
+@media print{
+nav,.no-print,header .no-print{
+display:none!important;
+}
+
+body{
+background:white;
+}
+
+.page{
+display:none!important;
+}
+
+#reports{
+display:block!important;
+}
+
+.card{
+box-shadow:none;
+}
+}
+</style>
+</head>
+
+<body>
+
+<!-- PIN LOCK -->
+<div id="pinLock">
+<div class="pin-box">
+
+<div style="font-size:50px">🥛</div>
+
+<h2>પિન કોડ</h2>
+
+<p>એપ્લિકેશન ખોલવા માટે 4 અંકનો પિન દાખલ કરો</p>
+
+<input
+id="pinInput"
+type="password"
+inputmode="numeric"
+maxlength="4"
+autocomplete="off"
+placeholder="••••"
+>
+
+<div class="actions" style="justify-content:center">
+
+<button class="primary" onclick="checkPIN()">
+ખોલો
+</button>
+
+</div>
+
+<div id="pinMsg" class="pin-msg"></div>
+
+</div>
+</div>
+
+
+<!-- HEADER -->
+<header>
+
+<div class="milk-icon">🥛</div>
+
+<h1>દૂધ વ્યવસ્થાપન</h1>
+
+<p>
+ગ્રાહક • ગાયનું દૂધ • ભેંસનું દૂધ • સવાર • સાંજ
+</p>
+
+</header>
+
+
+<!-- MENU -->
+<nav class="no-print">
+
+<button class="active" onclick="showPage('home',this)">
+🏠 હોમ
+</button>
+
+<button onclick="showPage('customers',this)">
+👤 ગ્રાહકો
+</button>
+
+<button onclick="showPage('milk',this)">
+🥛 દૂધ નોંધ
+</button>
+
+<button onclick="showPage('payments',this)">
+💰 ચુકવણી
+</button>
+
+<button onclick="showPage('reports',this)">
+📊 રિપોર્ટ
+</button>
+
+<button onclick="backupData()">
+📥 બેકઅપ
+</button>
+
+<button onclick="document.getElementById('backupFile').click()">
+📤 ડેટા પુનઃસ્થાપિત કરો
+</button>
+
+<button onclick="changePIN()">
+🔐 પિન બદલો
+</button>
+
+<input
+id="backupFile"
+type="file"
+accept=".json,application/json"
+style="display:none"
+onchange="restoreData(event)"
+>
+
+</nav>
+
+
+<main>
+
+<!-- HOME -->
+<section id="home" class="page active">
+
+<div class="card">
+
+<h2>🥛 દૂધ વ્યવસ્થાપન</h2>
+
+<div class="summary">
+
+<div>
+ગ્રાહકો
+<div class="big" id="sCustomers">0</div>
+</div>
+
+<div>
+આજનું કુલ દૂધ
+<div class="big" id="sToday">0.00 L</div>
+</div>
+
+<div>
+આજની રકમ
+<div class="big">₹<span id="sMoney">0</span></div>
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+
+<h2>આ એપમાં</h2>
+
+<p>
+દરેક ગ્રાહક માટે સવાર અને સાંજનું દૂધ અલગથી નોંધો.
+</p>
+
+<p>
+🐄 ગાયનું દૂધ અને 🐃 ભેંસનું દૂધ અલગ રાખો.
+</p>
+
+<p>
+🥛 દૂધના વાસણ/કેનની નોંધ રાખી શકાય છે.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>💾 ડેટા બેકઅપ</h2>
+
+<p>
+તમારો સંપૂર્ણ ડેટા એક ફાઇલમાં સાચવો અને જરૂર પડે ત્યારે પાછો લાવો.
+</p>
+
+<div class="actions">
+
+<button class="primary" onclick="backupData()">
+📥 બેકઅપ લો
+</button>
+
+<button class="gray"
+onclick="document.getElementById('backupFile').click()">
+📤 ડેટા પુનઃસ્થાપિત કરો
+</button>
+
+</div>
+
+<div class="notice">
+⚠️ બેકઅપ ફાઇલને સુરક્ષિત જગ્યાએ રાખો.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- CUSTOMERS -->
+<section id="customers" class="page">
+
+<div class="card">
+
+<h2>👤 ગ્રાહક ઉમેરો</h2>
+
+<div class="grid">
+
+<label>
+ગ્રાહકનું નામ
+<input id="cName" placeholder="ગ્રાહકનું નામ">
+</label>
+
+<label>
+મોબાઇલ નંબર
+<input id="cPhone" inputmode="tel" placeholder="મોબાઇલ નંબર">
+</label>
+
+<label>
+સરનામું
+<input id="cAddress" placeholder="સરનામું">
+</label>
+
+</div>
+
+<div class="actions">
+
+<button class="primary" onclick="addCustomer()">
+ગ્રાહક સાચવો
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>ગ્રાહકોની યાદી</h2>
+
+<table>
+
+<thead>
+
+<tr>
+<th>નામ</th>
+<th>મોબાઇલ</th>
+<th>સરનામું</th>
+<th>ક્રિયા</th>
+</tr>
+
+</thead>
+
+<tbody id="customerTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- MILK -->
+<section id="milk" class="page">
+
+<div class="card">
+
+<h2>🥛 દૂધની નોંધ</h2>
+
+<div class="grid">
+
+<label>
+તારીખ
+<input id="mDate" type="date">
+</label>
+
+<label>
+ગ્રાહક
+<select id="mCustomer"></select>
+</label>
+
+<label>
+સમય
+
+<select id="mTime">
+
+<option value="સવાર">
+🌅 સવાર
+</option>
+
+<option value="સાંજ">
+🌆 સાંજ
+</option>
+
+</select>
+
+</label>
+
+
+<label>
+દૂધનો પ્રકાર
+
+<select id="mType">
+
+<option value="ગાય">
+🐄 ગાયનું દૂધ
+</option>
+
+<option value="ભેંસ">
+🐃 ભેંસનું દૂધ
+</option>
+
+</select>
+
+</label>
+
+
+<label>
+વાસણ
+
+<select id="mContainer">
+
+<option value="કેન">
+🥛 દૂધનો કેન
+</option>
+
+<option value="બાલ્ટી">
+🪣 બાલ્ટી
+</option>
+
+<option value="ડબ્બો">
+🥫 ડબ્બો
+</option>
+
+<option value="ગ્લાસ">
+🥛 ગ્લાસ
+</option>
+
+</select>
+
+</label>
+
+
+<label>
+જથ્થો (લિટર)
+
+<input
+id="mQty"
+type="number"
+step="0.01"
+min="0"
+placeholder="0.00"
+>
+
+</label>
+
+
+<label>
+દર (₹/લિટર)
+
+<input
+id="mRate"
+type="number"
+step="0.01"
+min="0"
+placeholder="0.00"
+>
+
+</label>
+
+</div>
+
+
+<div class="actions">
+
+<button class="primary" onclick="addMilk()">
+🥛 દૂધ સાચવો
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>દૂધની નોંધો</h2>
+
+<table>
+
+<thead>
+
+<tr>
+<th>તારીખ</th>
+<th>ગ્રાહક</th>
+<th>સમય</th>
+<th>પ્રકાર</th>
+<th>વાસણ</th>
+<th>લિટર</th>
+<th>રકમ</th>
+<th>ક્રિયા</th>
+</tr>
+
+</thead>
+
+<tbody id="milkTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- PAYMENTS -->
+<section id="payments" class="page">
+
+<div class="card">
+
+<h2>💰 ચુકવણી</h2>
+
+<div class="grid">
+
+<label>
+તારીખ
+<input id="pDate" type="date">
+</label>
+
+<label>
+ગ્રાહક
+<select id="pCustomer"></select>
+</label>
+
+<label>
+રકમ (₹)
+<input id="pAmount" type="number" step="0.01">
+</label>
+
+<label>
+નોંધ
+<input id="pNote" placeholder="માસિક ચુકવણી">
+</label>
+
+</div>
+
+
+<div class="actions">
+
+<button class="primary" onclick="addPayment()">
+ચુકવણી સાચવો
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>ચુકવણીની યાદી</h2>
+
+<table>
+
+<thead>
+
+<tr>
+<th>તારીખ</th>
+<th>ગ્રાહક</th>
+<th>રકમ</th>
+<th>નોંધ</th>
+<th>ક્રિયા</th>
+</tr>
+
+</thead>
+
+<tbody id="paymentTable"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- REPORT -->
+<section id="reports" class="page">
+
+<div class="card no-print">
+
+<h2>📊 રિપોર્ટ</h2>
+
+<div class="grid">
+
+<label>
+શરૂ તારીખ
+<input id="rFrom" type="date">
+</label>
+
+<label>
+અંત તારીખ
+<input id="rTo" type="date">
+</label>
+
+<label>
+ગ્રાહક
+
+<select id="rCustomer">
+<option value="">બધા ગ્રાહકો</option>
+</select>
+
+</label>
+
+</div>
+
+
+<div class="actions">
+
+<button class="primary" onclick="makeReport()">
+રિપોર્ટ બનાવો
+</button>
+
+<button class="gray" onclick="window.print()">
+🖨️ પ્રિન્ટ / PDF
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>દૂધ રિપોર્ટ</h2>
+
+<div id="reportBox"></div>
+
+</div>
+
+</section>
+
+</main>
+
+
+<script>
+
+const PIN_KEY="samejaMilkPIN";
+
+const DEFAULT_PIN="8585";
+
+const DATA_KEY="samejaMilkManagement";
+
+
+function $(id){
+return document.getElementById(id);
+}
+
+
+/* PIN */
+
+function getPIN(){
+
+return localStorage.getItem(PIN_KEY) || DEFAULT_PIN;
+
+}
+
+
+function checkPIN(){
+
+let v=$("pinInput").value.trim();
+
+if(/^\d{4}$/.test(v) && v===getPIN()){
+
+$("pinLock").style.display="none";
+
+$("pinInput").value="";
+
+$("pinMsg").textContent="";
+
+sessionStorage.setItem("milkUnlocked","1");
+
+}else{
+
+$("pinMsg").textContent=
+"ખોટો પિન. ફરી પ્રયાસ કરો.";
+
+$("pinInput").value="";
+
+$("pinInput").focus();
+
+}
+
+}
+
+
+function changePIN(){
+
+let old=prompt(
+"વર્તમાન 4 અંકનો પિન દાખલ કરો:"
+);
+
+if(old===null)return;
+
+if(old!==getPIN()){
+
+alert("વર્તમાન પિન ખોટો છે.");
+
+return;
+
+}
+
+
+let np=prompt(
+"નવો 4 અંકનો પિન દાખલ કરો:"
+);
+
+if(np===null)return;
+
+if(!/^\d{4}$/.test(np)){
+
+alert("પિન 4 અંકનો હોવો જોઈએ.");
+
+return;
+
+}
+
+
+let cp=prompt(
+"નવો પિન ફરી દાખલ કરો:"
+);
+
+if(cp!==np){
+
+alert("બંને પિન સમાન નથી.");
+
+return;
+
+}
+
+
+localStorage.setItem(PIN_KEY,np);
+
+alert(
+"પિન સફળતાપૂર્વક બદલી દેવામાં આવ્યો છે."
+);
+
+}
+
+
+/* DATABASE */
+
+let db=JSON.parse(
+localStorage.getItem(DATA_KEY) ||
+'{"customers":[],"milk":[],"payments":[]}'
+);
+
+
+function save(){
+
+localStorage.setItem(
+DATA_KEY,
+JSON.stringify(db)
+);
+
+render();
+
+}
+
+
+function today(){
+
+return new Date()
+.toISOString()
+.slice(0,10);
+
+}
+
+
+/* NAVIGATION */
+
+function showPage(id,btn){
+
+document
+.querySelectorAll(".page")
+.forEach(x=>x.classList.remove("active"));
+
+$(id).classList.add("active");
+
+document
+.querySelectorAll("nav button")
+.forEach(x=>x.classList.remove("active"));
+
+btn.classList.add("active");
+
+render();
+
+}
+
+
+/* CUSTOMERS */
+
+function addCustomer(){
+
+let name=$("cName").value.trim();
+
+if(!name){
+
+alert("ગ્રાહકનું નામ લખો");
+
+return;
+
+}
+
+
+db.customers.push({
+
+id:Date.now().toString(),
+
+name:name,
+
+phone:$("cPhone").value.trim(),
+
+address:$("cAddress").value.trim()
+
+});
+
+
+$("cName").value="";
+$("cPhone").value="";
+$("cAddress").value="";
+
+save();
+
+alert("ગ્રાહક સફળતાપૂર્વક સાચવાઈ ગયો.");
+
+}
+
+
+function deleteCustomer(id){
+
+if(confirm("આ ગ્રાહક કાઢી નાખવો છે?")){
+
+db.customers=
+db.customers.filter(x=>x.id!==id);
+
+save();
+
+}
+
+}
+
+
+/* MILK */
+
+function addMilk(){
+
+let customer=$("mCustomer").value;
+
+let qty=Number($("mQty").value);
+
+let rate=Number($("mRate").value);
+
+
+if(!customer){
+
+alert("ગ્રાહક પસંદ કરો");
+
+return;
+
+}
+
+
+if(!qty || qty<0){
+
+alert("દૂધનો જથ્થો લખો");
+
+return;
+
+}
+
+
+if(!rate || rate<0){
+
+alert("દર લખો");
+
+return;
+
+}
+
+
+db.milk.push({
+
+id:Date.now().toString(),
+
+date:$("mDate").value,
+
+customerId:customer,
+
+time:$("mTime").value,
+
+type:$("mType").value,
+
+container:$("mContainer").value,
+
+qty:qty,
+
+rate:rate,
+
+total:qty*rate
+
+});
+
+
+$("mQty").value="";
+
+save();
+
+alert("દૂધની નોંધ સફળતાપૂર્વક સાચવાઈ ગઈ.");
+
+}
+
+
+function deleteMilk(id){
+
+if(confirm("આ નોંધ કાઢી નાખવી છે?")){
+
+db.milk=
+db.milk.filter(x=>x.id!==id);
+
+save();
+
+}
+
+}
+
+
+/* PAYMENT */
+
+function addPayment(){
+
+let customer=$("pCustomer").value;
+
+let amount=Number($("pAmount").value);
+
+
+if(!customer){
+
+alert("ગ્રાહક પસંદ કરો");
+
+return;
+
+}
+
+
+if(!amount){
+
+alert("રકમ લખો");
+
+return;
+
+}
+
+
+db.payments.push({
+
+id:Date.now().toString(),
+
+date:$("pDate").value,
+
+customerId:customer,
+
+amount:amount,
+
+note:$("pNote").value.trim()
+
+});
+
+
+$("pAmount").value="";
+$("pNote").value="";
+
+save();
+
+alert("ચુકવણી સફળતાપૂર્વક સાચવાઈ ગઈ.");
+
+}
+
+
+function deletePayment(id){
+
+if(confirm("આ ચુકવણી કાઢી નાખવી છે?")){
+
+db.payments=
+db.payments.filter(x=>x.id!==id);
+
+save();
+
+}
+
+}
+
+
+/* CUSTOMER NAME */
+
+function cname(id){
+
+let c=db.customers.find(x=>x.id===id);
+
+return c ? c.name : "-";
+
+}
+
+
+/* SELECT */
+
+function fillCustomers(){
+
+let opts=db.customers
+.map(c=>
+`<option value="${c.id}">
+${escapeHTML(c.name)}
+</option>`
+)
+.join("");
+
+
+$("mCustomer").innerHTML=
+opts ||
+'<option value="">પહેલા ગ્રાહક ઉમેરો</option>';
+
+
+$("pCustomer").innerHTML=
+opts ||
+'<option value="">પહેલા ગ્રાહક ઉમેરો</option>';
+
+
+$("rCustomer").innerHTML=
+'<option value="">બધા ગ્રાહકો</option>'+
+opts;
+
+}
+
+
+/* SECURITY */
+
+function escapeHTML(x){
+
+return String(x ?? "")
+.replace(/[&<>"']/g,function(c){
+
+return {
+
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+
+}[c];
+
+});
+
+}
+
+
+/* RENDER */
+
+function render(){
+
+fillCustomers();
+
+
+$("customerTable").innerHTML=
+db.customers
+.map(c=>`
+
+<tr>
+
+<td>${escapeHTML(c.name)}</td>
+
+<td>${escapeHTML(c.phone)}</td>
+
+<td>${escapeHTML(c.address)}</td>
+
+<td>
+
+<button
+class="danger"
+onclick="deleteCustomer('${c.id}')">
+
+કાઢો
+
+</button>
+
+</td>
+
+</tr>
+
+`)
+.join("");
+
+
+$("milkTable").innerHTML=
+db.milk
+.slice()
+.reverse()
+.map(x=>`
+
+<tr>
+
+<td>${x.date}</td>
+
+<td>${escapeHTML(cname(x.customerId))}</td>
+
+<td>${x.time}</td>
+
+<td>${x.type}</td>
+
+<td>${x.container}</td>
+
+<td>${x.qty.toFixed(2)}</td>
+
+<td>₹${x.total.toFixed(2)}</td>
+
+<td>
+
+<button
+class="danger"
+onclick="deleteMilk('${x.id}')">
+
+કાઢો
+
+</button>
+
+</td>
+
+</tr>
+
+`)
+.join("");
+
+
+$("paymentTable").innerHTML=
+db.payments
+.slice()
+.reverse()
+.map(x=>`
+
+<tr>
+
+<td>${x.date}</td>
+
+<td>${escapeHTML(cname(x.customerId))}</td>
+
+<td>₹${x.amount.toFixed(2)}</td>
+
+<td>${escapeHTML(x.note)}</td>
+
+<td>
+
+<button
+class="danger"
+onclick="deletePayment('${x.id}')">
+
+કાઢો
+
+</button>
+
+</td>
+
+</tr>
+
+`)
+.join("");
+
+
+let tm=db.milk.filter(
+x=>x.date===today()
+);
+
+let q=tm.reduce(
+(a,x)=>a+x.qty,0
+);
+
+let money=tm.reduce(
+(a,x)=>a+x.total,0
+);
+
+
+$("sCustomers").textContent=
+db.customers.length;
+
+$("sToday").textContent=
+q.toFixed(2)+" L";
+
+$("sMoney").textContent=
+money.toFixed(0);
+
+}
+
+
+/* REPORT */
+
+function makeReport(){
+
+let from=$("rFrom").value;
+
+let to=$("rTo").value;
+
+let cid=$("rCustomer").value;
+
+
+let rows=db.milk.filter(x=>
+(!from || x.date>=from) &&
+(!to || x.date<=to) &&
+(!cid || x.customerId===cid)
+);
+
+
+let total=rows.reduce(
+(a,x)=>a+x.qty,0
+);
+
+let amount=rows.reduce(
+(a,x)=>a+x.total,0
+);
+
+
+let cow=rows
+.filter(x=>x.type==="ગાય")
+.reduce((a,x)=>a+x.qty,0);
+
+
+let buffalo=rows
+.filter(x=>x.type==="ભેંસ")
+.reduce((a,x)=>a+x.qty,0);
+
+
+$("reportBox").innerHTML=`
+
+<div class="summary">
+
+<div>
+કુલ દૂધ
+<div class="big">
+${total.toFixed(2)} L
+</div>
+</div>
+
+
+<div>
+ગાયનું દૂધ
+<div class="big">
+${cow.toFixed(2)} L
+</div>
+</div>
+
+
+<div>
+ભેંસનું દૂધ
+<div class="big">
+${buffalo.toFixed(2)} L
+</div>
+</div>
+
+
+<div>
+કુલ રકમ
+<div class="big">
+₹${amount.toFixed(2)}
+</div>
+</div>
+
+</div>
+
+
+<table>
+
+<thead>
+
+<tr>
+<th>તારીખ</th>
+<th>ગ્રાહક</th>
+<th>સમય</th>
+<th>પ્રકાર</th>
+<th>વાસણ</th>
+<th>લિટર</th>
+<th>રકમ</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+${
+rows.map(x=>`
+
+<tr>
+
+<td>${x.date}</td>
+
+<td>${escapeHTML(cname(x.customerId))}</td>
+
+<td>${x.time}</td>
+
+<td>${x.type}</td>
+
+<td>${x.container}</td>
+
+<td>${x.qty.toFixed(2)}</td>
+
+<td>₹${x.total.toFixed(2)}</td>
+
+</tr>
+
+`).join("")
+}
+
+</tbody>
+
+</table>
+
+`;
+
+}
+
+
+/* BACKUP */
+
+function backupData(){
+
+let backup={
+
+app:"Sameja Milk Management",
+
+version:1,
+
+backupDate:new Date().toISOString(),
+
+data:db
+
+};
+
+
+let blob=new Blob(
+
+[JSON.stringify(backup,null,2)],
+
+{type:"application/json"}
+
+);
+
+
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+
+let d=new Date();
+
+function pad(n){
+
+return String(n).padStart(2,"0");
+
+}
+
+
+a.href=url;
+
+a.download=
+"Sameja_Milk_Backup_"+
+d.getFullYear()+"-"+
+pad(d.getMonth()+1)+"-"+
+pad(d.getDate())+
+".json";
+
+
+document.body.appendChild(a);
+
+a.click();
+
+a.remove();
+
+setTimeout(
+()=>URL.revokeObjectURL(url),
+1000
+);
+
+alert(
+"બેકઅપ ફાઇલ તૈયાર થઈ ગઈ છે. તેને સુરક્ષિત જગ્યાએ સાચવો."
+);
+
+}
+
+
+/* RESTORE */
+
+function restoreData(event){
+
+let file=event.target.files[0];
+
+if(!file)return;
+
+
+let reader=new FileReader();
+
+
+reader.onload=function(){
+
+try{
+
+let obj=JSON.parse(
+reader.result
+);
+
+let data=
+obj.data ? obj.data : obj;
+
+
+if(
+
+!data ||
+!Array.isArray(data.customers) ||
+!Array.isArray(data.milk) ||
+!Array.isArray(data.payments)
+
+){
+
+throw new Error();
+
+}
+
+
+if(!confirm(
+"હાલનો ડેટા બદલીને આ બેકઅપ લોડ કરવો છે?"
+)){
+
+return;
+
+}
+
+
+db={
+
+customers:data.customers,
+
+milk:data.milk,
+
+payments:data.payments
+
+};
+
+
+localStorage.setItem(
+DATA_KEY,
+JSON.stringify(db)
+);
+
+
+render();
+
+
+alert(
+"ડેટા સફળતાપૂર્વક પુનઃસ્થાપિત થયો છે."
+);
+
+
+}catch(e){
+
+alert(
+"આ માન્ય બેકઅપ ફાઇલ નથી."
+);
+
+}
+
+event.target.value="";
+
+};
+
+
+reader.readAsText(file);
+
+}
+
+
+/* INITIAL */
+
+$("mDate").value=today();
+
+$("pDate").value=today();
+
+$("rTo").value=today();
+
+$("rFrom").value=
+new Date(
+Date.now()-29*86400000
+)
+.toISOString()
+.slice(0,10);
+
+
+render();
+
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+if(
+sessionStorage.getItem("milkUnlocked")==="1"
+){
+
+$("pinLock").style.display="none";
+
+}else{
+
+$("pinLock").style.display="flex";
+
+}
+
+
+$("pinInput").addEventListener(
+"keydown",
+function(e){
+
+if(e.key==="Enter"){
+
+checkPIN();
+
+}
+
+});
+
+}
+);
+
+</script>
+
+</body>
+</html>
