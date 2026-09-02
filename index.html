@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+
+<!-- Play Store readiness:
+     - Offline/localStorage data retained.
+     - JSON Backup/Restore retained.
+     - Share-based Google Drive backup retained.
+     - Print/PDF entry point added.
+     - Android WebView back-navigation guard added.
+     A signed Android App Bundle (AAB) must still be produced by the Android wrapper/build process.
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>نوری بک سینٹر</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, "Noto Nastaliq Urdu", sans-serif;
+    background:#f1f5f9;
+    color:#172033;
+}
+
+button,input,select{
+    font-family:inherit;
+}
+
+.login{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(135deg,#0f172a,#1e3a8a);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.login-box{
+    width:90%;
+    max-width:380px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 15px 40px #0005;
+}
+
+.logo{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:#1e3a8a;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    font-size:35px;
+    font-weight:bold;
+}
+
+.login-box h1{
+    margin:15px 0 5px;
+}
+
+.login-box p{
+    color:#64748b;
+}
+
+.login-box input{
+    width:100%;
+    padding:14px;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    text-align:center;
+    font-size:20px;
+    margin:10px 0;
+}
+
+.login-box button{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:10px;
+    background:#1e3a8a;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.error{
+    color:#dc2626;
+    display:none;
+    margin-top:10px;
+}
+
+header{
+    background:#1e3a8a;
+    color:white;
+    padding:18px;
+    text-align:center;
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+header h1{
+    margin:0;
+    font-size:25px;
+}
+
+header small{
+    opacity:.85;
+}
+
+nav{
+    display:flex;
+    gap:7px;
+    overflow-x:auto;
+    padding:10px;
+    background:white;
+    box-shadow:0 2px 8px #0001;
+}
+
+nav button{
+    min-width:100px;
+    padding:11px;
+    border:0;
+    border-radius:9px;
+    background:#e2e8f0;
+    cursor:pointer;
+}
+
+nav button.active{
+    background:#1e3a8a;
+    color:white;
+}
+
+main{
+    max-width:1200px;
+    margin:auto;
+    padding:15px;
+}
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 2px 8px #0001;
+    text-align:center;
+}
+
+.card h2{
+    margin:5px 0;
+    color:#1e3a8a;
+}
+
+.card p{
+    margin:0;
+    color:#64748b;
+}
+
+.box{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 2px 8px #0001;
+    margin-bottom:20px;
+}
+
+.box h2{
+    margin-top:0;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:12px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    padding:11px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+}
+
+.form-group input[type="date"]{
+    direction:ltr;
+    text-align:center;
+    font-size:16px;
+}
+
+.btn{
+    padding:11px 18px;
+    border:0;
+    border-radius:8px;
+    cursor:pointer;
+    margin:5px 2px;
+}
+
+.primary{
+    background:#1e3a8a;
+    color:white;
+}
+
+.success{
+    background:#16a34a;
+    color:white;
+}
+
+.danger{
+    background:#dc2626;
+    color:white;
+}
+
+.warning{
+    background:#d97706;
+    color:white;
+}
+
+.gray{
+    background:#64748b;
+    color:white;
+}
+
+.payment{
+    background:#059669;
+    color:white;
+    font-size:13px;
+    padding:8px 12px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+    background:white;
+}
+
+th,td{
+    border:1px solid #e2e8f0;
+    padding:9px;
+    text-align:center;
+}
+
+th{
+    background:#e2e8f0;
+}
+
+.search{
+    width:100%;
+    padding:12px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+
+.total{
+    font-size:20px;
+    font-weight:bold;
+    color:#1e3a8a;
+    margin:15px 0;
+}
+
+.receipt{
+    max-width:500px;
+    margin:auto;
+    border:1px solid #ddd;
+    padding:20px;
+    background:white;
+}
+
+.receipt h2,
+.receipt h3{
+    text-align:center;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:#0008;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:10000;
+    padding:15px;
+}
+
+.modal-box{
+    background:white;
+    width:100%;
+    max-width:450px;
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 15px 40px #0005;
+}
+
+.modal-box h2{
+    margin-top:0;
+    text-align:center;
+    color:#1e3a8a;
+}
+
+.modal-box label{
+    display:block;
+    font-weight:bold;
+    margin:10px 0 5px;
+}
+
+.modal-box input{
+    width:100%;
+    padding:12px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-size:16px;
+}
+
+.modal-box input[type="date"]{
+    direction:ltr;
+    text-align:center;
+}
+
+.payment-info{
+    background:#f1f5f9;
+    padding:12px;
+    border-radius:10px;
+    margin:10px 0;
+    line-height:1.8;
+}
+
+footer{
+    text-align:center;
+    padding:25px;
+    color:#64748b;
+}
+
+@media(max-width:600px){
+
+    header h1{
+        font-size:21px;
+    }
+
+    .box{
+        padding:13px;
+    }
+
+    table{
+        font-size:12px;
+    }
+
+    th,td{
+        padding:6px;
+    }
+
+    .payment{
+        font-size:11px;
+        padding:7px;
+    }
+
+}
+
+@media print{
+
+    body *{
+        visibility:hidden;
+    }
+
+    #printArea,
+    #printArea *{
+        visibility:visible;
+    }
+
+    #printArea{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+
+    <div class="login-box">
+
+        <div class="logo">ن</div>
+
+        <h1>نوری بک سینٹر</h1>
+
+        <p>
+            انتظامی نظام میں داخل ہونے کے لیے PIN درج کریں
+        </p>
+
+        <input
+            type="password"
+            id="pin"
+            maxlength="4"
+            placeholder="PIN"
+            inputmode="numeric"
+        >
+
+        <button onclick="login()">
+            داخل ہوں
+        </button>
+
+        <div class="error" id="loginError">
+            غلط PIN! دوبارہ کوشش کریں۔
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PAYMENT MODAL -->
+<div class="modal" id="paymentModal">
+
+    <div class="modal-box">
+
+        <h2>💰 بقایا رقم جمع کریں</h2>
+
+        <div class="payment-info">
+
+            <div>
+                <strong>گاہک:</strong>
+                <span id="paymentCustomer"></span>
+            </div>
+
+            <div>
+                <strong>کتاب:</strong>
+                <span id="paymentBook"></span>
+            </div>
+
+            <div>
+                <strong>موجودہ بقایا:</strong>
+                ₹<span id="paymentCurrentDue">0</span>
+            </div>
+
+        </div>
+
+        <label>
+            📅 وصولی کی تاریخ
+        </label>
+
+        <input
+            type="date"
+            id="paymentDate"
+        >
+
+        <label>
+            💵 جمع ہونے والی رقم
+        </label>
+
+        <input
+            type="number"
+            id="paymentAmount"
+            min="1"
+            placeholder="رقم درج کریں"
+        >
+
+        <div style="text-align:center;margin-top:15px">
+
+            <button
+                class="btn success"
+                onclick="savePayment()">
+                💾 رقم جمع کریں
+            </button>
+
+            <button
+                class="btn gray"
+                onclick="closePaymentModal()">
+                منسوخ
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- HEADER -->
+<header>
+
+    <h1>📚 نوری بک سینٹر</h1>
+
+    <small>
+        Book Center Management System
+    </small>
+
+</header>
+
+
+<!-- NAVIGATION -->
+<nav>
+
+    <button
+        class="active"
+        onclick="showPage('dashboard',this)">
+        🏠 ڈیش بورڈ
+    </button>
+
+    <button
+        onclick="showPage('books',this)">
+        📚 کتابیں
+    </button>
+
+    <button
+        onclick="showPage('sale',this)">
+        🛒 فروخت
+    </button>
+
+    <button
+        onclick="showPage('purchase',this)">
+        📦 خریداری
+    </button>
+
+    <button
+        onclick="showPage('customers',this)">
+        👤 گاہک
+    </button>
+
+    <button
+        onclick="showPage('reports',this)">
+        📊 رپورٹس
+    </button>
+
+    <button
+        onclick="showPage('backup',this)">
+        💾 Backup
+    </button>
+
+    <button onclick="logout()">
+        🔐 لاگ آؤٹ
+    </button>
+
+</nav>
+
+
+<main>
+
+
+<!-- DASHBOARD -->
+<section class="page active" id="dashboard">
+
+    <div class="cards">
+
+        <div class="card">
+            <h2 id="totalBooks">0</h2>
+            <p>کتابوں کی تعداد</p>
+        </div>
+
+        <div class="card">
+            <h2 id="totalStock">0</h2>
+            <p>کل اسٹاک</p>
+        </div>
+
+        <div class="card">
+            <h2 id="totalSales">₹0</h2>
+            <p>کل فروخت</p>
+        </div>
+
+        <div class="card">
+            <h2 id="totalDue">₹0</h2>
+            <p>کل بقایا</p>
+        </div>
+
+    </div>
+
+    <div class="box">
+
+        <h2>📌 نوری بک سینٹر</h2>
+
+        <p>
+            کتابوں، خریداری، فروخت، گاہکوں اور بقایا جات
+            کا ریکارڈ آسانی سے محفوظ کریں۔
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- BOOKS -->
+<section class="page" id="books">
+
+    <div class="box">
+
+        <h2>➕ نئی کتاب شامل کریں</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>کتاب کا نام</label>
+                <input id="bookName">
+            </div>
+
+            <div class="form-group">
+                <label>مصنف</label>
+                <input id="bookAuthor">
+            </div>
+
+            <div class="form-group">
+
+                <label>کیٹیگری</label>
+
+                <select id="bookCategory">
+
+                    <option>دینی کتاب</option>
+                    <option>قرآن مجید</option>
+                    <option>حدیث</option>
+                    <option>فقہ</option>
+                    <option>بچوں کی کتاب</option>
+                    <option>اسکول کی کتاب</option>
+                    <option>اسٹیشنری</option>
+                    <option>دیگر</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label>خرید قیمت</label>
+                <input id="bookBuy" type="number">
+            </div>
+
+            <div class="form-group">
+                <label>فروخت قیمت</label>
+                <input id="bookSell" type="number">
+            </div>
+
+            <div class="form-group">
+                <label>تعداد</label>
+                <input id="bookStock" type="number">
+            </div>
+
+        </div>
+
+        <button
+            class="btn primary"
+            onclick="addBook()">
+            کتاب محفوظ کریں
+        </button>
+
+    </div>
+
+
+    <div class="box">
+
+        <h2>📚 کتابوں کا ریکارڈ</h2>
+
+        <input
+            class="search"
+            id="bookSearch"
+            placeholder="کتاب تلاش کریں..."
+            oninput="renderBooks()"
+        >
+
+        <div style="overflow-x:auto">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>نمبر</th>
+                        <th>کتاب</th>
+                        <th>مصنف</th>
+                        <th>کیٹیگری</th>
+                        <th>خرید</th>
+                        <th>فروخت</th>
+                        <th>اسٹاک</th>
+                        <th>عمل</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="bookTable"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- SALE -->
+<section class="page" id="sale">
+
+    <div class="box">
+
+        <h2>🛒 فروخت کا اندراج</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label>📅 فروخت کی تاریخ</label>
+
+                <input
+                    id="saleDate"
+                    type="date"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>گاہک کا نام</label>
+
+                <input id="saleCustomer">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>موبائل نمبر</label>
+
+                <input id="saleMobile">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>کتاب</label>
+
+                <select
+                    id="saleBook"
+                    onchange="calculateSale()">
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>تعداد</label>
+
+                <input
+                    id="saleQty"
+                    type="number"
+                    value="1"
+                    min="1"
+                    onchange="calculateSale()"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>ادا شدہ رقم</label>
+
+                <input
+                    id="salePaid"
+                    type="number"
+                    value="0"
+                    min="0"
+                    onchange="calculateSale()"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="total">
+
+            کل رقم:
+            <span id="saleTotal">₹0</span>
+
+            <br>
+
+            بقایا:
+            <span id="saleDue">₹0</span>
+
+        </div>
+
+
+        <button
+            class="btn success"
+            onclick="makeSale()">
+            فروخت محفوظ کریں
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- PURCHASE -->
+<section class="page" id="purchase">
+
+    <div class="box">
+
+        <h2>📦 خریداری کا اندراج</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label>📅 خریداری کی تاریخ</label>
+
+                <input
+                    id="purchaseDate"
+                    type="date"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>سپلائر کا نام</label>
+
+                <input id="supplier">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>کتاب</label>
+
+                <select id="purchaseBook"></select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>تعداد</label>
+
+                <input
+                    id="purchaseQty"
+                    type="number"
+                    value="1"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>کل رقم</label>
+
+                <input
+                    id="purchaseAmount"
+                    type="number"
+                >
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="btn primary"
+            onclick="makePurchase()">
+            خریداری محفوظ کریں
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- CUSTOMERS -->
+<section class="page" id="customers">
+
+    <div class="box">
+
+        <h2>👤 گاہکوں کا ریکارڈ</h2>
+
+        <input
+            class="search"
+            id="customerSearch"
+            placeholder="گاہک کا نام تلاش کریں..."
+            oninput="renderCustomers()"
+        >
+
+        <div style="overflow-x:auto">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>نمبر</th>
+                        <th>نام</th>
+                        <th>موبائل</th>
+                        <th>کل خریداری</th>
+                        <th>ادا شدہ</th>
+                        <th>بقایا</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="customerTable"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- REPORTS -->
+<section class="page" id="reports">
+
+    <div class="box">
+
+        <h2>📊 رپورٹس</h2>
+
+        <button
+            class="btn primary"
+            onclick="salesReport()">
+            🛒 فروخت رپورٹ
+        </button>
+
+        <button
+            class="btn success"
+            onclick="stockReport()">
+            📚 اسٹاک رپورٹ
+        </button>
+
+        <button
+            class="btn warning"
+            onclick="dueReport()">
+            💰 بقایا رپورٹ
+        </button>
+
+        <div id="reportArea"></div>
+
+    </div>
+
+</section>
+
+
+<!-- BACKUP -->
+<section class="page" id="backup">
+
+    <div class="box">
+
+        <h2>💾 ڈیٹا Backup / Restore</h2>
+
+        <p>
+            اپنا ڈیٹا محفوظ رکھنے کے لیے Backup فائل بنائیں۔
+            فون یا کمپیوٹر تبدیل کرنے کی صورت میں Restore کیا جا سکتا ہے۔
+        </p>
+
+        <button
+            class="btn primary"
+            onclick="backupData()">
+            📤 Backup فائل بنائیں
+        </button>
+
+        <button
+            class="btn success"
+            type="button"
+            onclick="googleDriveBackup()"
+            style="margin-top:8px">
+            ☁️ Google Drive Backup
+        </button>
+
+        <p style="font-size:12px;color:#64748b;margin-top:6px">
+            Google Drive بٹن سے Backup فائل تیار کرکے Android کے Share مینو میں Google Drive منتخب کریں۔
+        </p>
+
+        <br>
+
+        <input
+            type="file"
+            id="restoreFile"
+            accept="application/json,.json"
+            onchange="restoreData(event)"
+        >
+
+        <div id="backupRemembered" style="margin-top:10px;padding:10px;border-radius:10px;background:#f1f5f9;display:none">
+            <div id="backupRememberedText" style="font-size:13px;color:#334155;margin-bottom:8px"></div>
+            <button type="button" class="btn success" onclick="restoreRememberedBackup()">
+                ♻️ محفوظ شدہ Backup سے Restore کریں
+            </button>
+            <button type="button" class="btn warning" onclick="clearRememberedBackup()" style="margin-top:6px">
+                🗑️ محفوظ Backup ہٹائیں
+            </button>
+        </div>
+
+        <p style="font-size:13px;color:#64748b;margin-top:8px">
+            صرف نوری بک سینٹر کی <strong>.json</strong> Backup فائل منتخب کریں۔<br>
+            منتخب Backup کی ایک محفوظ کاپی ایپ میں یاد رکھی جائے گی، تاکہ ایپ بند کرکے دوبارہ کھولنے پر انتخاب ختم نہ ہو۔
+        </p>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<footer>
+    © 2026 نوری بک سینٹر
+</footer>
+
+
+<script>
+
+const PIN = "8080";
+
+
+let books =
+    JSON.parse(localStorage.getItem("nooriBooks")) || [];
+
+
+let sales =
+    JSON.parse(localStorage.getItem("nooriSales")) || [];
+
+
+let purchases =
+    JSON.parse(localStorage.getItem("nooriPurchases")) || [];
+
+
+/* جس فروخت کی بقایا رقم وصول ہونی ہے */
+let paymentSaleId = null;
+
+
+
+/* آج کی تاریخ */
+function todayDate(){
+
+    let d = new Date();
+
+    let year = d.getFullYear();
+
+    let month =
+        String(d.getMonth()+1).padStart(2,"0");
+
+    let day =
+        String(d.getDate()).padStart(2,"0");
+
+    return year + "-" + month + "-" + day;
+
+}
+
+
+
+/* تاریخ دکھانے کا طریقہ */
+function formatDate(date){
+
+    if(!date){
+        return "-";
+    }
+
+    let parts = date.split("-");
+
+    if(parts.length !== 3){
+        return date;
+    }
+
+    return parts[2] + "-" + parts[1] + "-" + parts[0];
+
+}
+
+
+
+/* تاریخیں آج پر سیٹ */
+function setDefaultDates(){
+
+    let today = todayDate();
+
+    document.getElementById("saleDate").value = today;
+
+    document.getElementById("purchaseDate").value = today;
+
+    document.getElementById("paymentDate").value = today;
+
+}
+
+
+
+function saveData(){
+
+    localStorage.setItem(
+        "nooriBooks",
+        JSON.stringify(books)
+    );
+
+    localStorage.setItem(
+        "nooriSales",
+        JSON.stringify(sales)
+    );
+
+    localStorage.setItem(
+        "nooriPurchases",
+        JSON.stringify(purchases)
+    );
+
+}
+
+
+
+function login(){
+
+    let pin =
+        document.getElementById("pin").value;
+
+    if(pin === PIN){
+
+        document.getElementById("loginScreen")
+            .style.display = "none";
+
+        setDefaultDates();
+
+        updateDashboard();
+        renderBooks();
+        updateBookSelects();
+        renderCustomers();
+
+    }else{
+
+        document.getElementById("loginError")
+            .style.display = "block";
+
+    }
+
+}
+
+
+
+function logout(){
+
+    document.getElementById("loginScreen")
+        .style.display = "flex";
+
+    document.getElementById("pin").value = "";
+
+}
+
+
+
+document.getElementById("pin")
+    .addEventListener("keydown",function(e){
+
+        if(e.key === "Enter"){
+            login();
+        }
+
+    });
+
+
+
+function showPage(id,button){
+
+    document.querySelectorAll(".page")
+        .forEach(p => p.classList.remove("active"));
+
+    document.getElementById(id)
+        .classList.add("active");
+
+
+    document.querySelectorAll("nav button")
+        .forEach(b => b.classList.remove("active"));
+
+    button.classList.add("active");
+
+
+    if(id === "sale" || id === "purchase"){
+
+        updateBookSelects();
+
+    }
+
+
+    if(id === "customers"){
+
+        renderCustomers();
+
+    }
+
+}
+
+
+
+function addBook(){
+
+    let name =
+        document.getElementById("bookName")
+        .value.trim();
+
+
+    let author =
+        document.getElementById("bookAuthor")
+        .value.trim();
+
+
+    let category =
+        document.getElementById("bookCategory")
+        .value;
+
+
+    let buy =
+        Number(
+            document.getElementById("bookBuy").value
+        );
+
+
+    let sell =
+        Number(
+            document.getElementById("bookSell").value
+        );
+
+
+    let stock =
+        Number(
+            document.getElementById("bookStock").value
+        );
+
+
+    if(!name || stock < 0){
+
+        alert(
+            "براہ کرم کتاب کا نام اور درست اسٹاک درج کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    books.push({
+
+        id:Date.now(),
+
+        name:name,
+
+        author:author,
+
+        category:category,
+
+        buy:buy,
+
+        sell:sell,
+
+        stock:stock
+
+    });
+
+
+    saveData();
+
+    renderBooks();
+
+    updateBookSelects();
+
+    updateDashboard();
+
+
+    document.getElementById("bookName").value="";
+    document.getElementById("bookAuthor").value="";
+    document.getElementById("bookBuy").value="";
+    document.getElementById("bookSell").value="";
+    document.getElementById("bookStock").value="";
+
+
+    alert(
+        "کتاب کامیابی سے محفوظ ہوگئی۔"
+    );
+
+}
+
+
+
+function renderBooks(){
+
+    let search =
+        document.getElementById("bookSearch")
+        .value
+        .toLowerCase();
+
+
+    let tbody =
+        document.getElementById("bookTable");
+
+
+    tbody.innerHTML="";
+
+
+    books
+    .filter(b =>
+        b.name.toLowerCase().includes(search)
+    )
+    .forEach((b,i)=>{
+
+        tbody.innerHTML += `
+
+        <tr>
+
+            <td>${i+1}</td>
+
+            <td>${b.name}</td>
+
+            <td>${b.author || "-"}</td>
+
+            <td>${b.category}</td>
+
+            <td>₹${b.buy}</td>
+
+            <td>₹${b.sell}</td>
+
+            <td>${b.stock}</td>
+
+            <td>
+
+                <button
+                    class="btn danger"
+                    onclick="deleteBook(${b.id})">
+                    حذف
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+
+
+function deleteBook(id){
+
+    if(
+        confirm(
+            "کیا آپ واقعی یہ کتاب حذف کرنا چاہتے ہیں؟"
+        )
+    ){
+
+        books =
+            books.filter(b => b.id !== id);
+
+        saveData();
+
+        renderBooks();
+
+        updateBookSelects();
+
+        updateDashboard();
+
+    }
+
+}
+
+
+
+function updateBookSelects(){
+
+    let sale =
+        document.getElementById("saleBook");
+
+
+    let purchase =
+        document.getElementById("purchaseBook");
+
+
+    sale.innerHTML =
+        '<option value="">کتاب منتخب کریں</option>';
+
+
+    purchase.innerHTML =
+        '<option value="">کتاب منتخب کریں</option>';
+
+
+    books.forEach(b=>{
+
+        sale.innerHTML +=
+            `<option value="${b.id}">
+                ${b.name} — ₹${b.sell}
+            </option>`;
+
+
+        purchase.innerHTML +=
+            `<option value="${b.id}">
+                ${b.name}
+            </option>`;
+
+    });
+
+}
+
+
+
+function calculateSale(){
+
+    let id =
+        Number(
+            document.getElementById("saleBook").value
+        );
+
+
+    let qty =
+        Number(
+            document.getElementById("saleQty").value
+        ) || 0;
+
+
+    let paid =
+        Number(
+            document.getElementById("salePaid").value
+        ) || 0;
+
+
+    let book =
+        books.find(b => b.id === id);
+
+
+    if(!book){
+
+        document.getElementById("saleTotal")
+            .innerText = "₹0";
+
+
+        document.getElementById("saleDue")
+            .innerText = "₹0";
+
+
+        return;
+
+    }
+
+
+    let total =
+        book.sell * qty;
+
+
+    let due =
+        Math.max(0,total-paid);
+
+
+    document.getElementById("saleTotal")
+        .innerText = "₹" + total;
+
+
+    document.getElementById("saleDue")
+        .innerText = "₹" + due;
+
+}
+
+
+
+function makeSale(){
+
+    let id =
+        Number(
+            document.getElementById("saleBook").value
+        );
+
+
+    let qty =
+        Number(
+            document.getElementById("saleQty").value
+        );
+
+
+    let paid =
+        Number(
+            document.getElementById("salePaid").value
+        ) || 0;
+
+
+    let customer =
+        document.getElementById("saleCustomer")
+        .value.trim();
+
+
+    let mobile =
+        document.getElementById("saleMobile")
+        .value.trim();
+
+
+    let date =
+        document.getElementById("saleDate")
+        .value;
+
+
+    let book =
+        books.find(b => b.id === id);
+
+
+    if(!date){
+
+        alert(
+            "براہ کرم فروخت کی تاریخ منتخب کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    if(!book){
+
+        alert(
+            "کتاب منتخب کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    if(qty <= 0){
+
+        alert(
+            "درست تعداد درج کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    if(qty > book.stock){
+
+        alert(
+            "اتنا اسٹاک موجود نہیں ہے۔"
+        );
+
+        return;
+
+    }
+
+
+    let total =
+        book.sell * qty;
+
+
+    if(paid > total){
+
+        alert(
+            "ادا شدہ رقم کل رقم سے زیادہ نہیں ہوسکتی۔"
+        );
+
+        return;
+
+    }
+
+
+    let due =
+        Math.max(0,total-paid);
+
+
+    book.stock -= qty;
+
+
+    sales.push({
+
+        id:Date.now(),
+
+        date:date,
+
+        customer:
+            customer || "عام گاہک",
+
+        mobile:mobile,
+
+        book:book.name,
+
+        qty:qty,
+
+        total:total,
+
+        paid:paid,
+
+        due:due,
+
+        payments:[]
+
+    });
+
+
+    saveData();
+
+    renderBooks();
+
+    updateBookSelects();
+
+    updateDashboard();
+
+    renderCustomers();
+
+
+    document.getElementById("saleCustomer")
+        .value="";
+
+
+    document.getElementById("saleMobile")
+        .value="";
+
+
+    document.getElementById("saleQty")
+        .value="1";
+
+
+    document.getElementById("salePaid")
+        .value="0";
+
+
+    document.getElementById("saleDate")
+        .value=todayDate();
+
+
+    calculateSale();
+
+
+    alert(
+        "فروخت کامیابی سے محفوظ ہوگئی۔"
+    );
+
+}
+
+
+
+function makePurchase(){
+
+    let id =
+        Number(
+            document.getElementById("purchaseBook").value
+        );
+
+
+    let qty =
+        Number(
+            document.getElementById("purchaseQty").value
+        );
+
+
+    let amount =
+        Number(
+            document.getElementById("purchaseAmount").value
+        ) || 0;
+
+
+    let supplier =
+        document.getElementById("supplier")
+        .value.trim();
+
+
+    let date =
+        document.getElementById("purchaseDate")
+        .value;
+
+
+    let book =
+        books.find(b => b.id === id);
+
+
+    if(!date){
+
+        alert(
+            "براہ کرم خریداری کی تاریخ منتخب کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    if(!book){
+
+        alert(
+            "کتاب منتخب کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    if(qty <= 0){
+
+        alert(
+            "درست تعداد درج کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    book.stock += qty;
+
+
+    purchases.push({
+
+        id:Date.now(),
+
+        date:date,
+
+        supplier:
+            supplier || "عام سپلائر",
+
+        book:book.name,
+
+        qty:qty,
+
+        amount:amount
+
+    });
+
+
+    saveData();
+
+    renderBooks();
+
+    updateBookSelects();
+
+    updateDashboard();
+
+
+    document.getElementById("supplier")
+        .value="";
+
+
+    document.getElementById("purchaseQty")
+        .value="1";
+
+
+    document.getElementById("purchaseAmount")
+        .value="";
+
+
+    document.getElementById("purchaseDate")
+        .value=todayDate();
+
+
+    alert(
+        "خریداری کامیابی سے محفوظ ہوگئی۔"
+    );
+
+}
+
+
+
+function updateDashboard(){
+
+    document.getElementById("totalBooks")
+        .innerText = books.length;
+
+
+    let stock =
+        books.reduce(
+            (sum,b)=>sum + Number(b.stock),
+            0
+        );
+
+
+    document.getElementById("totalStock")
+        .innerText = stock;
+
+
+    let salesTotal =
+        sales.reduce(
+            (sum,s)=>sum + Number(s.total),
+            0
+        );
+
+
+    document.getElementById("totalSales")
+        .innerText = "₹" + salesTotal;
+
+
+    let due =
+        sales.reduce(
+            (sum,s)=>sum + Number(s.due),
+            0
+        );
+
+
+    document.getElementById("totalDue")
+        .innerText = "₹" + due;
+
+}
+
+
+
+function renderCustomers(){
+
+    let search =
+        document.getElementById("customerSearch")
+        .value
+        .toLowerCase();
+
+
+    let customers = {};
+
+
+    sales.forEach(s=>{
+
+        let key =
+            s.customer + "|" + s.mobile;
+
+
+        if(!customers[key]){
+
+            customers[key] = {
+
+                name:s.customer,
+
+                mobile:s.mobile,
+
+                total:0,
+
+                paid:0,
+
+                due:0
+
+            };
+
+        }
+
+
+        customers[key].total +=
+            Number(s.total);
+
+
+        customers[key].paid +=
+            Number(s.paid);
+
+
+        customers[key].due +=
+            Number(s.due);
+
+    });
+
+
+    let tbody =
+        document.getElementById("customerTable");
+
+
+    tbody.innerHTML="";
+
+
+    Object.values(customers)
+    .filter(c =>
+        c.name.toLowerCase().includes(search)
+    )
+    .forEach((c,i)=>{
+
+        tbody.innerHTML += `
+
+        <tr>
+
+            <td>${i+1}</td>
+
+            <td>${c.name}</td>
+
+            <td>${c.mobile || "-"}</td>
+
+            <td>₹${c.total}</td>
+
+            <td>₹${c.paid}</td>
+
+            <td>₹${c.due}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+
+
+/* بقایا رپورٹ */
+
+function dueReport(){
+
+    let html = `
+
+    <h3>💰 بقایا رپورٹ</h3>
+
+    <table>
+
+        <tr>
+
+            <th>تاریخ</th>
+            <th>گاہک</th>
+            <th>موبائل</th>
+            <th>کتاب</th>
+            <th>کل رقم</th>
+            <th>ادا شدہ</th>
+            <th>بقایا</th>
+            <th>عمل</th>
+
+        </tr>
+
+    `;
+
+
+    let found = false;
+
+
+    sales
+    .filter(s => Number(s.due) > 0)
+    .forEach(s=>{
+
+        found = true;
+
+        html += `
+
+        <tr>
+
+            <td>${formatDate(s.date)}</td>
+
+            <td>${s.customer}</td>
+
+            <td>${s.mobile || "-"}</td>
+
+            <td>${s.book}</td>
+
+            <td>₹${s.total}</td>
+
+            <td>₹${s.paid}</td>
+
+            <td>
+                <strong>₹${s.due}</strong>
+            </td>
+
+            <td>
+
+                <button
+                    class="btn payment"
+                    onclick="openPaymentModal(${s.id})">
+                    💰 رقم جمع کریں
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+
+    if(!found){
+
+        html += `
+
+        <tr>
+
+            <td colspan="8">
+                کوئی بقایا رقم موجود نہیں ہے۔
+            </td>
+
+        </tr>
+
+        `;
+
+    }
+
+
+    html += "</table>";
+
+
+    document.getElementById("reportArea")
+        .innerHTML = html;
+
+}
+
+
+
+/* بقایا رقم جمع کرنے کا فارم کھولنا */
+
+function openPaymentModal(id){
+
+    let sale =
+        sales.find(s => s.id === id);
+
+
+    if(!sale){
+
+        alert("ریکارڈ نہیں ملا۔");
+
+        return;
+
+    }
+
+
+    if(Number(sale.due) <= 0){
+
+        alert("اس ریکارڈ کا کوئی بقایا نہیں ہے۔");
+
+        return;
+
+    }
+
+
+    paymentSaleId = id;
+
+
+    document.getElementById("paymentCustomer")
+        .innerText = sale.customer;
+
+
+    document.getElementById("paymentBook")
+        .innerText = sale.book;
+
+
+    document.getElementById("paymentCurrentDue")
+        .innerText = sale.due;
+
+
+    document.getElementById("paymentDate")
+        .value = todayDate();
+
+
+    document.getElementById("paymentAmount")
+        .value = "";
+
+
+    document.getElementById("paymentModal")
+        .style.display = "flex";
+
+
+    setTimeout(function(){
+
+        document.getElementById("paymentAmount")
+            .focus();
+
+    },100);
+
+}
+
+
+
+/* بقایا رقم والا فارم بند کرنا */
+
+function closePaymentModal(){
+
+    paymentSaleId = null;
+
+    document.getElementById("paymentModal")
+        .style.display = "none";
+
+}
+
+
+
+/* بقایا رقم وصول کرکے محفوظ کرنا */
+
+function savePayment(){
+
+    if(paymentSaleId === null){
+
+        alert("فروخت کا ریکارڈ منتخب نہیں ہے۔");
+
+        return;
+
+    }
+
+
+    let sale =
+        sales.find(s => s.id === paymentSaleId);
+
+
+    if(!sale){
+
+        alert("فروخت کا ریکارڈ نہیں ملا۔");
+
+        return;
+
+    }
+
+
+    let date =
+        document.getElementById("paymentDate")
+        .value;
+
+
+    let amount =
+        Number(
+            document.getElementById("paymentAmount")
+                .value
+        );
+
+
+    if(!date){
+
+        alert(
+            "براہ کرم رقم وصول کرنے کی تاریخ منتخب کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    if(!amount || amount <= 0){
+
+        alert(
+            "براہ کرم درست رقم درج کریں۔"
+        );
+
+        return;
+
+    }
+
+
+    if(amount > Number(sale.due)){
+
+        alert(
+            "جمع کی جانے والی رقم بقایا رقم سے زیادہ نہیں ہوسکتی۔"
+        );
+
+        return;
+
+    }
+
+
+    /*
+       پرانے ریکارڈ کے لیے بھی payments
+       خود بن جائے گا
+    */
+
+    if(!Array.isArray(sale.payments)){
+
+        sale.payments = [];
+
+    }
+
+
+    sale.payments.push({
+
+        id:Date.now(),
+
+        date:date,
+
+        amount:amount
+
+    });
+
+
+    sale.paid =
+        Number(sale.paid) + amount;
+
+
+    sale.due =
+        Math.max(
+            0,
+            Number(sale.total) - Number(sale.paid)
+        );
+
+
+    saveData();
+
+    updateDashboard();
+
+    renderCustomers();
+
+    dueReport();
+
+
+    closePaymentModal();
+
+
+    alert(
+        "₹" + amount +
+        " رقم کامیابی سے جمع ہوگئی۔\n" +
+        "باقی بقایا: ₹" + sale.due
+    );
+
+}
+
+
+
+/* فروخت رپورٹ */
+
+function salesReport(){
+
+    let html = `
+
+    <h3>🛒 فروخت رپورٹ</h3>
+
+    <table>
+
+        <tr>
+
+            <th>تاریخ</th>
+            <th>گاہک</th>
+            <th>کتاب</th>
+            <th>تعداد</th>
+            <th>کل</th>
+            <th>ادا</th>
+            <th>بقایا</th>
+
+        </tr>
+
+    `;
+
+
+    sales.forEach(s=>{
+
+        html += `
+
+        <tr>
+
+            <td>${formatDate(s.date)}</td>
+
+            <td>${s.customer}</td>
+
+            <td>${s.book}</td>
+
+            <td>${s.qty}</td>
+
+            <td>₹${s.total}</td>
+
+            <td>₹${s.paid}</td>
+
+            <td>₹${s.due}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+
+    html += "</table>";
+
+
+    document.getElementById("reportArea")
+        .innerHTML = html;
+
+}
+
+
+
+function stockReport(){
+
+    let html = `
+
+    <h3>📚 اسٹاک رپورٹ</h3>
+
+    <table>
+
+        <tr>
+
+            <th>کتاب</th>
+            <th>کیٹیگری</th>
+            <th>قیمت</th>
+            <th>موجودہ اسٹاک</th>
+
+        </tr>
+
+    `;
+
+
+    books.forEach(b=>{
+
+        html += `
+
+        <tr>
+
+            <td>${b.name}</td>
+
+            <td>${b.category}</td>
+
+            <td>₹${b.sell}</td>
+
+            <td>${b.stock}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+
+    html += "</table>";
+
+
+    document.getElementById("reportArea")
+        .innerHTML = html;
+
+}
+
+
+
+/* Backup */
+
+function backupData(){
+
+    let data = {
+
+        app: "Noori Book Center",
+
+        version: "1.0",
+
+        books:books,
+
+        sales:sales,
+
+        purchases:purchases,
+
+        backupDate:
+            new Date().toLocaleString("ur-IN")
+
+    };
+
+
+    let blob =
+        new Blob(
+            [JSON.stringify(data,null,2)],
+            {type:"application/json"}
+        );
+
+
+    let url =
+        URL.createObjectURL(blob);
+
+
+    let a =
+        document.createElement("a");
+
+
+    a.href = url;
+
+
+    let stamp =
+        todayDate().replace(/-/g,"_") + "_" +
+        new Date().getHours().toString().padStart(2,"0") +
+        new Date().getMinutes().toString().padStart(2,"0");
+
+    a.download =
+        "Noori_Book_Center_Backup_" + stamp + ".json";
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+
+/* Google Drive Backup */
+
+async function googleDriveBackup(){
+
+    let data = {
+        app: "Noori Book Center",
+        version: "1.0",
+        books: books,
+        sales: sales,
+        purchases: purchases,
+        backupDate: new Date().toLocaleString("ur-IN")
+    };
+
+    let stamp = todayDate().replace(/-/g,"_") + "_" +
+        new Date().getHours().toString().padStart(2,"0") +
+        new Date().getMinutes().toString().padStart(2,"0");
+
+    let fileName = "Noori_Book_Center_Backup_" + stamp + ".json";
+    let file = new File([JSON.stringify(data,null,2)], fileName, {type:"application/json"});
+
+    try{
+        if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+            await navigator.share({
+                title: "Noori Book Center Backup",
+                text: "Noori Book Center کا Backup Google Drive میں محفوظ کریں۔",
+                files: [file]
+            });
+            alert("Backup Share مینو کھل گیا ہے۔ Google Drive منتخب کرکے فائل محفوظ کریں۔");
+        }else{
+            let url = URL.createObjectURL(file);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            alert("اس ڈیوائس پر Share/Google Drive براہِ راست دستیاب نہیں۔ Backup فائل ڈاؤن لوڈ ہوگئی ہے؛ اسے Google Drive میں Upload کریں۔");
+        }
+    }catch(err){
+        if(err && err.name === "AbortError") return;
+        alert("Google Drive Backup میں مسئلہ آیا۔ پہلے Backup فائل بنائیں اور پھر اسے Google Drive میں محفوظ کریں۔");
+    }
+}
+
+
+/* Restore */
+
+function applyBackupData(data){
+
+    if(
+        !data ||
+        !data.books ||
+        !data.sales ||
+        !data.purchases
+    ){
+        throw new Error();
+    }
+
+    books = data.books;
+    sales = data.sales;
+    purchases = data.purchases;
+
+    saveData();
+    renderBooks();
+    updateBookSelects();
+    updateDashboard();
+    renderCustomers();
+}
+
+function showRememberedBackup(){
+    try{
+        let saved = localStorage.getItem("nooriLastBackup");
+        if(!saved) return;
+
+        let info = JSON.parse(saved);
+        let box = document.getElementById("backupRemembered");
+        let text = document.getElementById("backupRememberedText");
+
+        if(info && info.json && info.name){
+            text.innerHTML = "📁 منتخب Backup محفوظ ہے: <strong>" + info.name + "</strong>";
+            box.style.display = "block";
+        }
+    }catch(e){}
+}
+
+function restoreData(event){
+
+    let file = event.target.files[0];
+    if(!file) return;
+
+    let reader = new FileReader();
+
+    reader.onload = function(e){
+        try{
+            let data = JSON.parse(e.target.result);
+            applyBackupData(data);
+
+            // منتخب Backup کو ایپ کے اندر بھی محفوظ رکھیں
+            localStorage.setItem("nooriLastBackup", JSON.stringify({
+                name: file.name,
+                json: e.target.result,
+                savedAt: new Date().toLocaleString("ur-IN")
+            }));
+
+            showRememberedBackup();
+
+            alert("Backup کامیابی سے Restore ہوگیا اور منتخب Backup محفوظ کر لیا گیا ہے۔");
+            document.getElementById("restoreFile").value = "";
+
+        }catch(err){
+            alert("Backup فائل درست نہیں ہے۔");
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function restoreRememberedBackup(){
+    try{
+        let saved = localStorage.getItem("nooriLastBackup");
+        if(!saved){
+            alert("کوئی محفوظ Backup موجود نہیں ہے۔");
+            return;
+        }
+
+        let info = JSON.parse(saved);
+        let data = JSON.parse(info.json);
+
+        if(!confirm("کیا آپ محفوظ شدہ Backup کو Restore کرنا چاہتے ہیں؟ موجودہ ڈیٹا Backup کے ڈیٹا سے تبدیل ہو جائے گا۔")) return;
+
+        applyBackupData(data);
+        alert("محفوظ شدہ Backup کامیابی سے Restore ہوگیا۔");
+
+    }catch(err){
+        alert("محفوظ Backup خراب یا نامکمل ہے۔");
+    }
+}
+
+function clearRememberedBackup(){
+    localStorage.removeItem("nooriLastBackup");
+    document.getElementById("backupRemembered").style.display = "none";
+    document.getElementById("restoreFile").value = "";
+    alert("محفوظ Backup کا انتخاب ہٹا دیا گیا ہے۔");
+}
+
+
+/* پروگرام شروع */
+
+window.addEventListener("load",function(){
+
+    setDefaultDates();
+    showRememberedBackup();
+
+});
+
+</script>
+
+
+<!-- Android/Browser Print & PDF support -->
+<div id="printTools" class="no-print" style="position:fixed;bottom:14px;left:14px;z-index:9999;display:flex;gap:8px;flex-wrap:wrap;">
+  <button type="button" onclick="printAppReport()" style="padding:10px 14px;border:0;border-radius:10px;background:#198754;color:#fff;font-weight:bold;">
+    🖨️ پرنٹ / PDF
+  </button>
+</div>
+<style>
+@media print{
+  .no-print,#printTools,button,input,select,textarea{display:none!important}
+  body{background:#fff!important}
+}
+</style>
+<script>
+function printAppReport(){
+  // Works in normal browser and WebView environments that expose the print dialog.
+  try{
+    window.print();
+  }catch(e){
+    alert("پرنٹ/پی ڈی ایف کے لیے ڈیوائس کا پرنٹ آپشن استعمال کریں۔");
+  }
+}
+</script>
+
+
+<script>
+(function(){
+  // Android/WebView: first Back closes open dialogs/menus; second Back navigates
+  // through the page history instead of unexpectedly leaving the app.
+  window.addEventListener("popstate", function(){
+    document.querySelectorAll(".modal,[role='dialog']").forEach(function(el){
+      if(el.style.display === "flex" || el.style.display === "block"){
+        el.style.display = "none";
+      }
+    });
+  });
+
+  // Push one history state so the first Android Back press stays inside the app.
+  try{ history.pushState({appGuard:true},"",location.href); }catch(e){}
+})();
+</script>
+
+</body>
+</html>
