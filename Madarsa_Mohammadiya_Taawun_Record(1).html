@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدرسہ محمدیہ اسلامیہ — ماہانہ تنخواہ ریکارڈ</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:15px;font-family:Arial,"Noto Nastaliq Urdu",sans-serif;background:#f1f5f7;color:#222}
+.container{max-width:950px;margin:auto}
+.header{background:#075e54;color:white;padding:20px;border-radius:15px;text-align:center;margin-bottom:15px}
+.header h1{margin:0 0 8px;font-size:25px}.header p{margin:4px 0}
+.calendar-panel{background:white;padding:16px;border-radius:14px;margin-bottom:15px;box-shadow:0 2px 7px #0001}
+.calendar-panel h2,.panel h2{margin-top:0;color:#075e54;font-size:19px}
+.calendar-box{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.calendar-box button{padding:12px}.month-display{text-align:center;background:#e8f3f1;padding:12px;border-radius:9px;color:#075e54;font-size:18px;font-weight:bold}
+.month-input{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px}
+.card{background:white;padding:15px;border-radius:12px;text-align:center;box-shadow:0 2px 7px #0002}
+.card span{color:#666;font-size:14px}.card b{display:block;font-size:21px;margin-top:5px;color:#075e54}
+.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px}
+button{border:0;border-radius:9px;padding:13px;font-size:16px;font-weight:bold;cursor:pointer}
+.green{background:#075e54;color:white}.blue{background:#0d6efd;color:white}.success{background:#198754;color:white}.yellow{background:#ffc107;color:#222}.red{background:#dc3545;color:white}.gray{background:#6c757d;color:white}
+.panel{background:white;padding:16px;border-radius:14px;margin-bottom:15px;box-shadow:0 2px 7px #0001}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px}.full{grid-column:1/-1}.hidden{display:none}
+.person-row{background:#f8fafb;border:1px solid #ddd;border-radius:10px;padding:10px;margin-bottom:10px}.person-row button{width:100%}
+.tablebox{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:700px}th,td{border-bottom:1px solid #ddd;padding:10px;text-align:center}th{background:#e8f3f1;color:#075e54}.paid{color:#198754;font-weight:bold}.due{color:#dc3545;font-weight:bold}
+.action button{padding:7px 9px;font-size:13px;margin:2px}
+.ad{background:white;border:2px solid #075e54;border-radius:14px;text-align:center;padding:18px;margin-top:20px}.ad strong{display:block;color:#075e54;font-size:23px;margin-bottom:8px}.phone{direction:ltr;font-size:19px;font-weight:bold}
+.current-month{background:#fff3cd;border:1px solid #ffc107;color:#664d03;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;font-weight:bold}
+@media print{.buttons,.form-panel,.collection-panel,.calendar-panel,.action,.ad{display:none!important}body{background:white}.header{color:black;background:white;border:2px solid #075e54}.current-month{border:1px solid #222;background:white;color:black}}
+@media(max-width:650px){.cards,.buttons,.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.header h1{font-size:21px}.calendar-box{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header"><h1>مدرسہ محمدیہ اسلامیہ</h1><p>(بھوجرڈہ بنی، بھوج، کچھ، گجرات)</p><p>ماہانہ تنخواہ ریکارڈ سسٹم</p></div>
+
+<div class="calendar-panel">
+<h2>📅 مہینہ منتخب کریں</h2>
+<div class="calendar-box">
+<button class="blue" onclick="previousMonth()">⬅ پچھلا مہینہ</button>
+<div><input type="month" id="monthPicker" class="month-input" onchange="changeMonth()"><div id="monthDisplay" class="month-display" style="margin-top:8px;"></div></div>
+<button class="blue" onclick="nextMonth()">اگلا مہینہ ➡</button>
+</div>
+</div>
+
+<div id="currentMonthText" class="current-month"></div>
+
+<div class="cards">
+<div class="card"><span>کل افراد</span><b id="totalPeople">0</b></div>
+<div class="card"><span>کل جمع رقم</span><b id="totalPaid">₹0</b></div>
+<div class="card"><span>کل باقی رقم</span><b id="totalDue">₹0</b></div>
+</div>
+
+<div class="buttons">
+<button class="green" onclick="showAddForm()">➕ تعاون کرنے والے شامل کریں</button>
+<button class="success" onclick="showPayment()">💰 رقم جمع کریں</button>
+<button class="blue" onclick="showReport()">📊 رپورٹ</button>
+</div>
+
+<div id="addPanel" class="panel form-panel hidden">
+<h2>➕ تعاون کرنے والے افراد شامل کریں</h2><p>تعاون کرنے والے کا نام اور ماہانہ مقررہ تعاون درج کریں۔ نام ایک بار محفوظ ہونے کے بعد ہر نئے مہینے میں خودکار طور پر موجود رہے گا۔</p>
+<div id="peopleRows"></div>
+<button class="blue" onclick="addPersonRow()">➕ مزید فرد شامل کریں</button><br><br>
+<button class="success" onclick="addAllPeople()">💾 تمام افراد محفوظ کریں</button>
+<button class="gray" onclick="hidePanels()">بند کریں</button>
+</div>
+
+<div id="paymentPanel" class="panel collection-panel hidden">
+<h2>💰 رقم جمع کریں</h2><div id="paymentMonthInfo" class="current-month"></div>
+<div class="formgrid">
+<select id="personSelect" class="full"></select>
+<input id="paymentAmount" type="number" min="1" placeholder="جمع کی جانے والی رقم">
+</div><br>
+<button class="success" onclick="addPayment()">رقم جمع کریں</button>
+<button class="gray" onclick="hidePanels()">بند کریں</button>
+</div>
+
+<div id="reportPanel" class="panel">
+<h2>📊 ماہانہ رپورٹ</h2><p style="color:#666">تعاون کرنے والے افراد مستقل فہرست میں محفوظ رہتے ہیں؛ ہر نئے مہینے میں صرف جمع رقم کا نیا ریکارڈ شروع ہوتا ہے۔</p>
+<div class="tablebox"><table><thead><tr><th>نمبر</th><th>نام</th><th>مقررہ رقم</th><th>جمع</th><th>باقی</th><th class="action">کارروائی</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+</div>
+
+<div class="buttons">
+<button class="yellow" onclick="printReport()">🖨 رپورٹ پرنٹ کریں</button>
+<button class="gray" onclick="newMonth()">📅 اگلا مہینہ بنائیں</button>
+<button class="red" onclick="deleteAll()">⚠ تمام ریکارڈ حذف کریں</button>
+</div>
+
+<div class="ad"><strong>عبدالسلام نوری</strong><div class="phone">M: 9429820648</div></div>
+</div>
+
+<script>
+const STORAGE_KEY="madarsa_salary_calendar_data";
+let data=JSON.parse(localStorage.getItem(STORAGE_KEY))||{people:[],months:{}};
+let currentMonth=new Date().toISOString().slice(0,7);
+const monthNames=["جنوری","فروری","مارچ","اپریل","مئی","جون","جولائی","اگست","ستمبر","اکتوبر","نومبر","دسمبر"];
+
+function money(number){return "₹"+Number(number||0).toLocaleString("en-IN")}
+function saveData(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render()}
+function getMonthData(){if(!data.months[currentMonth])data.months[currentMonth]={};return data.months[currentMonth]}
+function getCurrentMonthName(){let p=currentMonth.split("-");return monthNames[Number(p[1])-1]+" "+Number(p[0])}
+function updateMonthDisplay(){let t=getCurrentMonthName();document.getElementById("monthDisplay").textContent=t;document.getElementById("currentMonthText").textContent="📅 موجودہ رپورٹ: "+t;document.getElementById("monthPicker").value=currentMonth}
+function changeMonth(){currentMonth=document.getElementById("monthPicker").value||new Date().toISOString().slice(0,7);updateMonthDisplay();render()}
+function previousMonth(){let d=new Date(currentMonth+"-01");d.setMonth(d.getMonth()-1);currentMonth=d.toISOString().slice(0,7);updateMonthDisplay();render()}
+function nextMonth(){let d=new Date(currentMonth+"-01");d.setMonth(d.getMonth()+1);currentMonth=d.toISOString().slice(0,7);updateMonthDisplay();render()}
+
+function showAddForm(){hidePanels();if(document.querySelectorAll("#peopleRows .person-row").length===0)addPersonRow();document.getElementById("addPanel").classList.remove("hidden")}
+function addPersonRow(){
+let c=document.getElementById("peopleRows"),row=document.createElement("div");row.className="person-row formgrid";
+row.innerHTML=`<input class="personName" placeholder="فرد کا نام"><input class="monthlySalary" type="number" min="0" placeholder="ماہانہ مقررہ رقم"><input class="firstPayment" type="number" min="0" placeholder="اس ماہ جمع رقم"><button type="button" class="red" onclick="removePersonRow(this)">🗑 حذف</button>`;
+c.appendChild(row);row.querySelector(".personName").focus()
+}
+function removePersonRow(button){let rows=document.querySelectorAll("#peopleRows .person-row");if(rows.length<=1){alert("کم از کم ایک قطار موجود رہنی چاہیے۔");return}button.parentElement.remove()}
+
+function addAllPeople(){
+let rows=document.querySelectorAll("#peopleRows .person-row"),monthData=getMonthData(),count=0;
+for(let row of rows){
+let name=row.querySelector(".personName").value.trim(),salary=Number(row.querySelector(".monthlySalary").value)||0,paid=Number(row.querySelector(".firstPayment").value)||0;
+if(name===""&&salary===0&&paid===0)continue;
+if(name===""){alert("براہ کرم ہر فرد کا نام درج کریں۔");return}
+if(salary<0||paid<0){alert("رقم درست درج کریں۔");return}
+let id=Date.now()+count+Math.floor(Math.random()*1000);
+data.people.push({id,name,salary});monthData[id]=paid;count++
+}
+if(count===0){alert("براہ کرم کم از کم ایک فرد درج کریں۔");return}
+saveData();document.getElementById("peopleRows").innerHTML="";addPersonRow();hidePanels();alert(count+" افراد کامیابی سے محفوظ ہوگئے۔")
+}
+
+function showPayment(){hidePanels();fillPersonList();document.getElementById("paymentMonthInfo").textContent="💰 رقم "+getCurrentMonthName()+" کے ریکارڈ میں جمع ہوگی";document.getElementById("paymentPanel").classList.remove("hidden")}
+function fillPersonList(){
+let select=document.getElementById("personSelect");select.innerHTML="";
+if(data.people.length===0){let o=document.createElement("option");o.value="";o.textContent="پہلے افراد کے نام شامل کریں";select.appendChild(o);return}
+let md=getMonthData();
+data.people.forEach(person=>{let paid=Number(md[person.id])||0,due=Math.max(0,person.salary-paid),o=document.createElement("option");o.value=person.id;o.textContent=person.name+" — باقی "+money(due);select.appendChild(o)})
+}
+function addPayment(){
+let id=Number(document.getElementById("personSelect").value),amount=Number(document.getElementById("paymentAmount").value),person=data.people.find(p=>p.id===id);
+if(!person){alert("براہ کرم فرد منتخب کریں۔");return}
+if(amount<=0){alert("جمع کی جانے والی رقم درج کریں۔");return}
+let md=getMonthData();md[person.id]=(Number(md[person.id])||0)+amount;
+document.getElementById("paymentAmount").value="";saveData();fillPersonList();alert(money(amount)+" رقم "+getCurrentMonthName()+" میں کامیابی سے جمع ہوگئی۔")
+}
+function hidePanels(){document.getElementById("addPanel").classList.add("hidden");document.getElementById("paymentPanel").classList.add("hidden")}
+
+function render(){
+let tbody=document.getElementById("tableBody");tbody.innerHTML="";let totalPaid=0,totalDue=0,md=getMonthData();
+data.people.forEach((person,index)=>{
+let paid=Number(md[person.id])||0,due=Math.max(0,person.salary-paid);totalPaid+=paid;totalDue+=due;
+let row=document.createElement("tr");row.innerHTML=`<td>${index+1}</td><td>${escapeHTML(person.name)}</td><td>${money(person.salary)}</td><td class="paid">${money(paid)}</td><td class="${due>0?'due':'paid'}">${money(due)}</td><td class="action"><button class="yellow" onclick="editPerson(${person.id})">✏ ترمیم</button><button class="red" onclick="deletePerson(${person.id})">🗑 حذف</button></td>`;tbody.appendChild(row)
+});
+document.getElementById("totalPeople").textContent=data.people.length;document.getElementById("totalPaid").textContent=money(totalPaid);document.getElementById("totalDue").textContent=money(totalDue)
+}
+function escapeHTML(text){return String(text).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function editPerson(id){
+let p=data.people.find(x=>x.id===id);if(!p)return;let name=prompt("فرد کا نام:",p.name);if(name===null)return;let salary=prompt("ماہانہ مقررہ رقم:",p.salary);if(salary===null)return;let ns=Number(salary);if(isNaN(ns)||ns<0){alert("رقم درست درج کریں۔");return}p.name=name.trim()||p.name;p.salary=ns;saveData()
+}
+function deletePerson(id){
+let p=data.people.find(x=>x.id===id);if(!p)return;
+if(confirm("کیا آپ "+p.name+" کا مکمل ریکارڈ حذف کرنا چاہتے ہیں؟")){data.people=data.people.filter(x=>x.id!==id);Object.keys(data.months).forEach(m=>delete data.months[m][id]);saveData()}
+}
+function showReport(){hidePanels();document.getElementById("reportPanel").scrollIntoView({behavior:"smooth"})}
+function printReport(){window.print()}
+function newMonth(){
+if(data.people.length===0){alert("ابھی کوئی فرد موجود نہیں۔");return}
+let d=new Date(currentMonth+"-01");d.setMonth(d.getMonth()+1);currentMonth=d.toISOString().slice(0,7);if(!data.months[currentMonth])data.months[currentMonth]={};updateMonthDisplay();saveData();alert("نیا مہینہ "+getCurrentMonthName()+" شروع ہوگیا۔\n\nتمام نام اور مقررہ تنخواہیں محفوظ ہیں، نئی ماہانہ جمع رقم صفر سے شروع ہوگی۔")
+}
+function deleteAll(){
+if(confirm("⚠ تمام افراد اور تمام مہینوں کا ریکارڈ حذف ہوجائے گا۔\n\nکیا آپ واقعی حذف کرنا چاہتے ہیں؟")){data={people:[],months:{}};saveData();hidePanels();alert("تمام ریکارڈ حذف ہوگیا۔")}
+}
+document.addEventListener("DOMContentLoaded",()=>{document.getElementById("monthPicker").value=currentMonth;updateMonthDisplay();render()});
+</script>
+</body>
+</html>
